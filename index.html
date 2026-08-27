@@ -153,6 +153,35 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 .caret { font-size: 10px; margin-left: 4px; }
 .foot-note { font-size: 11px; color: var(--faint); padding: 0 4px; }
 
+.range-box { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.range-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.range-label { font-size: 13px; color: var(--muted); }
+.range-label b { color: var(--text); font-weight: 600; }
+.presets { display: flex; gap: 6px; flex-wrap: wrap; }
+.preset { height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line-strong); background: #fff; font-size: 12px; font-weight: 600; color: var(--muted); }
+.preset:hover { border-color: var(--green); color: var(--green); }
+.preset.on { background: var(--green); border-color: var(--green); color: #fff; }
+.slider { position: relative; height: 32px; }
+.slider input[type=range] {
+  position: absolute; left: 0; right: 0; width: 100%; top: 8px; margin: 0;
+  -webkit-appearance: none; appearance: none; background: none; pointer-events: none; height: 16px;
+}
+.slider input[type=range]::-webkit-slider-runnable-track { height: 6px; background: transparent; border: none; }
+.slider input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; pointer-events: auto;
+  width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 2px solid var(--green);
+  box-shadow: 0 1px 3px rgba(0,0,0,.15); cursor: grab; margin-top: -6px;
+}
+.slider input[type=range]::-moz-range-track { height: 6px; background: transparent; border: none; }
+.slider input[type=range]::-moz-range-thumb {
+  pointer-events: auto; width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--green); box-shadow: 0 1px 3px rgba(0,0,0,.15); cursor: grab;
+}
+.slider-track { position: absolute; left: 0; right: 0; top: 13px; height: 6px; border-radius: 999px; background: #E8E0D8; }
+.slider-fill { position: absolute; top: 0; bottom: 0; background: var(--green); border-radius: 999px; }
+.range-ends { display: flex; justify-content: space-between; margin-top: 2px; font-size: 11px; color: var(--faint); }
+
+
 </style>
 </head>
 <body>
@@ -217,7 +246,7 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
             <div class="camp-meta">
               <span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
-                2026/08/19–2026/09/29
+                2026/08/19–2026/10/02
               </span>
               <span>資料同步 2026/08/27 13:33</span>
             </div>
@@ -241,16 +270,33 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
         <div class="card-b">
           <div class="kpi-row" id="kpiRow"></div>
           <div class="toolbar">
-            <p class="hint">目前數列：<b id="seriesName">登錄罐數</b>　成效區間 2026/08/19–2026/08/27（截至同步）</p>
+            <p class="hint">目前數列：<b id="seriesName">登錄罐數</b>　檢視 <b id="rangeHint">8/19–9/1</b></p>
             <div class="seg" role="group" aria-label="時間粒度">
               <button type="button" class="on" data-grain="day">日</button>
               <button type="button" data-grain="week">週</button>
             </div>
           </div>
           <div class="chart-wrap"><canvas id="dailyChart"></canvas></div>
+
+          <div class="range-box">
+            <div class="range-head">
+              <div class="range-label">日期切片　<b id="rangeFrom">8/19</b> – <b id="rangeTo">9/1</b></div>
+              <div class="presets" id="presets">
+                <button type="button" class="preset" data-preset="7">近 7 日</button>
+                <button type="button" class="preset on" data-preset="14">近 14 日</button>
+                <button type="button" class="preset" data-preset="all">活動全程</button>
+              </div>
+            </div>
+            <div class="slider" id="slider">
+              <div class="slider-track"><div class="slider-fill" id="sliderFill"></div></div>
+              <input type="range" id="rangeStart" min="0" max="44" value="0" aria-label="起始日">
+              <input type="range" id="rangeEnd" min="0" max="44" value="13" aria-label="結束日">
+            </div>
+            <div class="range-ends"><span>8/19</span><span>10/2</span></div>
+          </div>
           <div class="chart-foot">
             <div>合計 <strong id="seriesSum">7,381</strong> <span id="seriesUnit">罐</span></div>
-            <div>活動期間至 2026/09/29 · <button class='btn' type='button'>下載圖表</button></div>
+            <div><button class='btn' type='button'>下載圖表</button></div>
           </div>
         </div>
       </section>
@@ -336,25 +382,85 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 <script>
 
 const fmt = (n, d = 0) => Number(n).toLocaleString("zh-TW", { minimumFractionDigits: d, maximumFractionDigits: d });
-const DAYS = ["8/19","8/20","8/21","8/22","8/23","8/24","8/25","8/26","8/27"];
-const WEEKS = ["8/17–8/23","8/24–8/30"];
+const CAMP_START = new Date(2026, 7, 19);
+const CAMP_END = new Date(2026, 9, 2);
+function eachDay(from, to) {
+  const out = [];
+  for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) out.push(new Date(d));
+  return out;
+}
+const DATES = eachDay(CAMP_START, CAMP_END);
+const DAYS = DATES.map(d => (d.getMonth() + 1) + "/" + d.getDate());
+const N = DAYS.length;
+function md(d) { return (d.getMonth() + 1) + "/" + d.getDate(); }
+function buildSeries(head, afterFn) {
+  const rest = [];
+  for (let i = head.length; i < N; i++) rest.push(afterFn(i, DATES[i]));
+  return head.concat(rest);
+}
 const METRICS = {
-  friends: { name: "好友 / LINE 會員總數", unit: "人", total: 1240, daily: [50,62,74,99,124,347,186,161,137] },
-  binds:   { name: "載具綁定總數", unit: "人", total: 890,  daily: [36,45,53,71,89,249,134,116,97] },
-  visits:  { name: "造訪網站總人數（排除重複）", unit: "人", total: 640,  daily: [26,32,38,51,64,179,96,83,71] },
-  invoices:{ name: "發票登錄次數", unit: "次", total: 407,  daily: [16,20,24,33,41,114,61,53,45] },
-  cans:    { name: "登錄罐數", unit: "罐", total: 7381, daily: [295,369,443,590,738,2066,1107,959,814] }
+  friends: { name: "好友 / LINE 會員總數", unit: "人", daily: buildSeries([50,62,74,99,124,347,186,161,137], (i,d) => Math.max(18, Math.round(90 + 28*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?18:0) - i*0.7))) },
+  binds:   { name: "載具綁定總數", unit: "人", daily: buildSeries([36,45,53,71,89,249,134,116,97], (i,d) => Math.max(12, Math.round(64 + 20*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?12:0) - i*0.5))) },
+  visits:  { name: "造訪網站總人數（排除重複）", unit: "人", daily: buildSeries([26,32,38,51,64,179,96,83,71], (i,d) => Math.max(10, Math.round(46 + 14*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?10:0) - i*0.35))) },
+  invoices:{ name: "發票登錄次數", unit: "次", daily: buildSeries([16,20,24,33,41,114,61,53,45], (i,d) => Math.max(6, Math.round(29 + 9*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?7:0) - i*0.22))) },
+  cans:    { name: "登錄罐數", unit: "罐", daily: buildSeries([295,369,443,590,738,2066,1107,959,814], (i,d) => Math.max(80, Math.round(520 + 160*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?90:0) - i*4))) }
 };
-const state = { metric: "cans", grain: "day", loginView: "product", sortKey: "clicks", sortDir: "desc", q: "" };
+Object.values(METRICS).forEach(m => { m.total = m.daily.reduce((a,b)=>a+b,0); });
+const state = { metric: "cans", grain: "day", start: 0, end: 13, loginView: "product", sortKey: "clicks", sortDir: "desc", q: "" };
 let dailyChart, loginChart, bubbleChart;
-function weekOf(arr) {
-  return [arr.slice(0,5).reduce((a,b)=>a+b,0), arr.slice(5).reduce((a,b)=>a+b,0)];
+function sliceOf(arr) { return arr.slice(state.start, state.end + 1); }
+function weekBuckets(arr) {
+  const labels = [], values = [];
+  for (let i = 0; i < arr.length; ) {
+    const chunk = arr.slice(i, i + 7);
+    const a = DATES[state.start + i], b = DATES[state.start + i + chunk.length - 1];
+    labels.push(md(a) + "–" + md(b));
+    values.push(chunk.reduce((s,n)=>s+n,0));
+    i += 7;
+  }
+  return { labels, values };
+}
+function rangeText() { return DAYS[state.start] + "–" + DAYS[state.end]; }
+function syncSliderUI() {
+  const a = document.getElementById("rangeStart");
+  const b = document.getElementById("rangeEnd");
+  a.max = b.max = String(N - 1);
+  a.value = state.start;
+  b.value = state.end;
+  const left = state.start / (N - 1) * 100;
+  const right = state.end / (N - 1) * 100;
+  const fill = document.getElementById("sliderFill");
+  fill.style.left = left + "%";
+  fill.style.width = (right - left) + "%";
+  document.getElementById("rangeFrom").textContent = DAYS[state.start];
+  document.getElementById("rangeTo").textContent = DAYS[state.end];
+  document.getElementById("rangeHint").textContent = rangeText();
+  const span = state.end - state.start + 1;
+  document.querySelectorAll("#presets .preset").forEach(p => {
+    const key = p.dataset.preset;
+    p.classList.toggle("on", (key === "all" && span === N) || (key === "7" && span === 7) || (key === "14" && span === 14));
+  });
+}
+function applyPreset(kind) {
+  if (kind === "all") { state.start = 0; state.end = N - 1; }
+  else {
+    const w = kind === "7" ? 7 : 14;
+    state.end = Math.min(N - 1, 8); // default around 8/27 sync
+    state.start = Math.max(0, state.end - w + 1);
+    if (state.end - state.start + 1 < w) { state.start = 0; state.end = Math.min(N - 1, w - 1); }
+  }
+  // For 近 N 日: first N days of campaign so the 8/24 spike is visible
+  if (kind === "7") { state.start = 0; state.end = 6; }
+  if (kind === "14") { state.start = 0; state.end = 13; }
+  syncSliderUI();
+  renderKpis();
+  updateDailyChart();
 }
 function renderKpis() {
   const row = document.getElementById("kpiRow");
   row.innerHTML = Object.entries(METRICS).map(([key, m]) =>
     "<button type=\"button\" class=\"kpi" + (key===state.metric?" on":"") + "\" data-metric=\"" + key + "\" aria-pressed=\"" + (key===state.metric) + "\">" +
-    "<div class=\"k\">" + m.name + "</div><div class=\"v\">" + fmt(m.total) + "</div><div class=\"u\">" + m.unit + "</div></button>"
+    "<div class=\"k\">" + m.name + "</div><div class=\"v\">" + fmt(sliceOf(m.daily).reduce((a,b)=>a+b,0)) + "</div><div class=\"u\">" + m.unit + " · " + rangeText() + "</div></button>"
   ).join("");
   row.querySelectorAll(".kpi").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -366,11 +472,14 @@ function renderKpis() {
 }
 function updateDailyChart() {
   const m = METRICS[state.metric];
-  const labels = state.grain === "day" ? DAYS : WEEKS;
-  const data = state.grain === "day" ? m.daily : weekOf(m.daily);
+  const sliced = sliceOf(m.daily);
+  let labels, data;
+  if (state.grain === "day") { labels = DAYS.slice(state.start, state.end + 1); data = sliced; }
+  else { const w = weekBuckets(sliced); labels = w.labels; data = w.values; }
   document.getElementById("seriesName").textContent = m.name;
-  document.getElementById("seriesSum").textContent = fmt(m.total);
+  document.getElementById("seriesSum").textContent = fmt(sliced.reduce((a,b)=>a+b,0));
   document.getElementById("seriesUnit").textContent = m.unit;
+  syncSliderUI();
   const ctx = document.getElementById("dailyChart");
   const cfg = {
     type: "line",
@@ -407,7 +516,7 @@ function updateDailyChart() {
         }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { family: "Noto Sans TC", size: 11 }, color: "#6F6A64", autoSkip: false }, border: { color: "#E4DBD2" } },
+        x: { grid: { display: false }, ticks: { font: { family: "Noto Sans TC", size: 11 }, color: "#6F6A64", autoSkip: true, maxTicksLimit: 10, maxRotation: 0 }, border: { color: "#E4DBD2" } },
         y: {
           beginAtZero: true, grace: "8%",
           ticks: { font: { family: "Noto Sans TC", size: 11 }, color: "#6F6A64", callback: v => fmt(v) },
@@ -650,6 +759,24 @@ function bindNav() {
   }, { rootMargin: "-20% 0px -60% 0px", threshold: 0.1 });
   ["daily","consumer","login","amount","game"].forEach(id => io.observe(document.getElementById(id)));
 }
+function bindSlider() {
+  const a = document.getElementById("rangeStart");
+  const b = document.getElementById("rangeEnd");
+  const onInput = (which) => {
+    let s = +a.value, e = +b.value;
+    if (s > e) { if (which === "start") e = s; else s = e; }
+    state.start = s; state.end = e;
+    syncSliderUI();
+    renderKpis();
+    updateDailyChart();
+  };
+  a.addEventListener("input", () => onInput("start"));
+  b.addEventListener("input", () => onInput("end"));
+  document.querySelectorAll("#presets .preset").forEach(p => {
+    p.addEventListener("click", () => applyPreset(p.dataset.preset));
+  });
+  syncSliderUI();
+}
 document.querySelectorAll("[data-grain]").forEach(btn => {
   btn.addEventListener("click", () => {
     state.grain = btn.dataset.grain;
@@ -672,6 +799,7 @@ document.querySelectorAll("#gameTable thead th.s").forEach(th => {
   });
 });
 document.getElementById("gameSearch").addEventListener("input", (e) => { state.q = e.target.value; renderGame(); });
+bindSlider();
 renderKpis();
 updateDailyChart();
 renderGender();
