@@ -217,7 +217,7 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
       <button class="chip on" type="button" data-jump="daily">每日成效</button>
       <button class="chip" type="button" data-jump="consumer">消費者</button>
       <button class="chip" type="button" data-jump="login">登錄</button>
-      <button class="chip" type="button" data-jump="amount">登錄金額</button>
+      <button class="chip" type="button" data-jump="amount">消費金額</button>
       <button class="chip" type="button" data-jump="game">遊戲追蹤</button>
     </nav>
     <main class="page">
@@ -342,13 +342,13 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 
       <section class="card section" id="amount">
         <div class="card-h">
-          <h2>登錄金額<span class="sub">消費金額與次數（人數統計）</span></h2>
-          <span class="axis-note">氣泡大小 = 人數 · 軸距互斥</span>
+          <h2>消費金額與次數 <span class="sub">（人數統計）</span></h2>
+          <button class="btn" type="button">下載 CSV檔</button>
         </div>
         <div class="card-b">
           <div class="bubble-wrap"><canvas id="bubbleChart"></canvas></div>
           <div class="chart-foot">
-            <div>X 累積金額（元）　Y 累積次數　合計 <strong>374</strong> 人</div>
+            <div>氣泡大小 = 人數　合計 <strong id="bubbleTotal">374</strong> 人</div>
             <div>懸停氣泡可看人數</div>
           </div>
         </div>
@@ -656,20 +656,22 @@ function updateLoginChart() {
   loginChart = new Chart(document.getElementById("loginChart"), cfg);
 }
 
-const X_BINS = ["≤0","1–74","75–148","149–222","223–296","297–370","371–444","445–518","519–592","593–666","≥667"];
-const Y_BINS = ["1","2","3","4","5","6","7","≥8"];
+const X_BINS = ["<=0","1-21","22-42","43-63","64-84","85-105","106-126","127-147","148-168","169-189",">=190"];
+const Y_BINS = ["1-2","2-3","3-4","4-5","5-6","6-7","7-8",">=8"];
 const BUBBLES = [
-  [0,0,6],[1,0,28],[2,0,41],[3,0,36],[4,0,29],[5,0,16],[6,0,8],[8,0,3],[10,0,18],
-  [1,1,8],[2,1,15],[3,1,21],[4,1,17],[5,1,11],[7,1,6],[10,1,16],
-  [3,2,7],[4,2,9],[5,2,8],[10,2,22],
-  [4,3,5],[6,3,4],[10,3,12],
-  [5,4,3],[10,4,7],
-  [7,5,2],[10,5,5],
-  [10,6,3],
-  [9,7,2],[10,7,6]
+  [2,0,86],[5,0,34],[3,0,14],[4,0,11],[7,0,8],[8,0,6],[9,0,5],[10,0,38],
+  [10,1,32],[2,1,9],[5,1,7],
+  [10,2,18],[5,2,4],
+  [10,3,12],
+  [10,4,9],
+  [10,5,4],
+  [10,6,6],
+  [10,7,8]
 ];
 function renderBubble() {
   const maxN = Math.max(...BUBBLES.map(b => b[2]));
+  const bubbleEl = document.getElementById("bubbleTotal");
+  if (bubbleEl) bubbleEl.textContent = fmt(BUBBLES.reduce((s,b)=>s+b[2],0));
   const points = BUBBLES.map(([x,y,n]) => ({ x, y, r: 5 + Math.sqrt(n / maxN) * 22, n }));
   bubbleChart = new Chart(document.getElementById("bubbleChart"), {
     type: "bubble",
@@ -684,7 +686,7 @@ function renderBubble() {
           bodyFont: { family: "Noto Sans TC", size: 13 },
           padding: 10,
           callbacks: {
-            title: (items) => { const p = items[0].raw; return "金額 " + X_BINS[p.x] + " 元 · 次數 " + Y_BINS[p.y]; },
+            title: (items) => { const p = items[0].raw; return "金額 " + X_BINS[p.x] + " 元 · 次數 " + Y_BINS[p.y] + " 次"; },
             label: (item) => " 人數  " + fmt(item.raw.n) + " 人"
           }
         }
@@ -694,14 +696,14 @@ function renderBubble() {
           min: -0.6, max: 10.6,
           ticks: { stepSize: 1, callback: v => X_BINS[v] ?? "", font: { family: "Noto Sans TC", size: 10 }, color: "#6F6A64", maxRotation: 45, minRotation: 45 },
           grid: { color: "rgba(228,219,210,.9)" },
-          title: { display: true, text: "受眾總消費累積金額（元）", font: { family: "Noto Sans TC", size: 12 }, color: "#6F6A64", padding: 8 },
+          title: { display: true, text: "受眾總消費累積金額 (元)", font: { family: "Noto Sans TC", size: 12 }, color: "#6F6A64", padding: 8 },
           border: { color: "#E4DBD2" }
         },
         y: {
           min: -0.6, max: 7.6,
           ticks: { stepSize: 1, callback: v => Y_BINS[v] ?? "", font: { family: "Noto Sans TC", size: 11 }, color: "#6F6A64" },
           grid: { color: "rgba(228,219,210,.9)" },
-          title: { display: true, text: "受眾總消費累積次數", font: { family: "Noto Sans TC", size: 12 }, color: "#6F6A64" },
+          title: { display: true, text: "受眾總消費累積次數 (次)", font: { family: "Noto Sans TC", size: 12 }, color: "#6F6A64" },
           border: { display: false }
         }
       }
