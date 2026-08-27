@@ -140,10 +140,11 @@ a { color: inherit; text-decoration: none; }
 .table-tools { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .search { height: 36px; width: 280px; padding: 0 12px 0 32px; border: 1px solid var(--line-strong); border-radius: 8px; font-family: inherit; font-size: 13px; color: var(--text); background: #fff url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27 fill=%27none%27 stroke=%27%239A948C%27 stroke-width=%271.6%27 viewBox=%270 0 24 24%27%3E%3Ccircle cx=%2711%27 cy=%2711%27 r=%277%27/%3E%3Cpath d=%27M20 20l-3-3%27/%3E%3C/svg%3E") 10px 50% no-repeat; }
 .search:focus { outline: none; border-color: var(--green); }
+.table-frame { max-height: 280px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; }
 table.ga { width: 100%; border-collapse: collapse; font-size: 13px; }
 table.ga th, table.ga td { padding: 12px 16px; border-bottom: 1px solid var(--line); text-align: right; }
 table.ga th:first-child, table.ga td:first-child { text-align: left; }
-table.ga thead th { font-size: 12px; font-weight: 600; color: var(--muted); background: #FAF7F4; user-select: none; }
+table.ga thead th { font-size: 12px; font-weight: 600; color: var(--muted); background: #FAF7F4; user-select: none; position: sticky; top: 0; z-index: 1; }
 table.ga thead th.s { cursor: pointer; }
 table.ga thead th.s:hover { color: var(--green); }
 table.ga thead th.active { color: var(--green); }
@@ -481,6 +482,7 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
           </div>
         </div>
         <div class="card-b" style="padding-top:0">
+          <div class="table-frame">
           <table class="ga" id="gameTable">
             <thead>
               <tr>
@@ -492,6 +494,7 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
             </thead>
             <tbody id="gameBody"></tbody>
           </table>
+          </div>
         </div>
       </section>
       <p class="foot-note">TAIWAN BEER CRM · 專案成效分析示意頁 · 資料同步 2026/08/27 13:33（UTC+8）</p>
