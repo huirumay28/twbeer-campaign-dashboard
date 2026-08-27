@@ -272,7 +272,7 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
     </header>
     <div class="crumbs">專案管理 / 專案成效分析 / <b>買台啤抽元大 0050</b></div>
     <nav class="chipbar" id="chipbar" aria-label="區塊導覽">
-      <button class="chip on" type="button" data-jump="daily">每日成效</button>
+      <button class="chip on" type="button" data-jump="daily">專案成效總覽</button>
       <button class="chip" type="button" data-jump="consumer">消費者</button>
       <button class="chip" type="button" data-jump="login">登錄</button>
       <button class="chip" type="button" data-jump="amount">消費金額</button>
@@ -305,16 +305,17 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
       </section>
       <section class="card section" id="daily">
         <div class="card-h">
-          <h2>每日成效<span class="sub">點選指標，圖表只顯示該數列</span></h2>
+          <h2>專案成效總覽<span class="sub">點選指標，圖表只顯示該數列</span></h2>
           <div class="qual">
-            <span class="pill">合格手動 <b>316</b> 次</span>
-            <span class="pill">合格載具 <b>421</b> 次</span>
+            <span class="pill">合格掃描登錄總數 <b>268</b> 次</span>
+            <span class="pill">合格手動輸入總數 <b>316</b> 次</span>
+            <span class="pill">合格載具輸入總數 <b>421</b> 次</span>
           </div>
         </div>
         <div class="card-b">
           <div class="kpi-row" id="kpiRow"></div>
           <div class="toolbar">
-            <p class="hint">目前數列：<b id="seriesName">登錄罐數</b>　檢視 <b id="rangeHint">8/19–9/1</b></p>
+            <p class="hint">目前數列：<b id="seriesName">登錄總罐數</b>　檢視 <b id="rangeHint">8/19–9/1</b></p>
             <div class="seg" role="group" aria-label="時間粒度">
               <button type="button" class="on" data-grain="day">日</button>
               <button type="button" data-grain="week">週</button>
@@ -451,20 +452,21 @@ function eachDay(from, to) {
   return out;
 }
 const DATES = eachDay(CAMP_START, CAMP_END);
-const DAYS = DATES.map(d => (d.getMonth() + 1) + "/" + d.getDate());
+const WD = ["日","一","二","三","四","五","六"];
+const DAYS = DATES.map(d => (d.getMonth() + 1) + "/" + d.getDate() + " (" + WD[d.getDay()] + ")");
 const N = DAYS.length;
-function md(d) { return (d.getMonth() + 1) + "/" + d.getDate(); }
+function md(d) { return (d.getMonth() + 1) + "/" + d.getDate() + " (" + WD[d.getDay()] + ")"; }
 function buildSeries(head, afterFn) {
   const rest = [];
   for (let i = head.length; i < N; i++) rest.push(afterFn(i, DATES[i]));
   return head.concat(rest);
 }
 const METRICS = {
-  friends: { name: "好友 / LINE 會員總數", unit: "人", daily: buildSeries([50,62,74,99,124,347,186,161,137], (i,d) => Math.max(18, Math.round(90 + 28*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?18:0) - i*0.7))) },
-  binds:   { name: "載具綁定總數", unit: "人", daily: buildSeries([36,45,53,71,89,249,134,116,97], (i,d) => Math.max(12, Math.round(64 + 20*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?12:0) - i*0.5))) },
-  visits:  { name: "造訪網站總人數（排除重複）", unit: "人", daily: buildSeries([26,32,38,51,64,179,96,83,71], (i,d) => Math.max(10, Math.round(46 + 14*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?10:0) - i*0.35))) },
-  invoices:{ name: "發票登錄次數", unit: "次", daily: buildSeries([16,20,24,33,41,114,61,53,45], (i,d) => Math.max(6, Math.round(29 + 9*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?7:0) - i*0.22))) },
-  cans:    { name: "登錄罐數", unit: "罐", daily: buildSeries([295,369,443,590,738,2066,1107,959,814], (i,d) => Math.max(80, Math.round(520 + 160*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?90:0) - i*4))) }
+  friends: { name: "新增好友數", unit: "人", daily: buildSeries([50,62,74,99,124,347,186,161,137], (i,d) => Math.max(18, Math.round(90 + 28*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?18:0) - i*0.7))) },
+  binds:   { name: "新增綁定數", unit: "人", daily: buildSeries([36,45,53,71,89,249,134,116,97], (i,d) => Math.max(12, Math.round(64 + 20*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?12:0) - i*0.5))) },
+  visits:  { name: "造訪網站總人數 (排除重複)", unit: "人", daily: buildSeries([26,32,38,51,64,179,96,83,71], (i,d) => Math.max(10, Math.round(46 + 14*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?10:0) - i*0.35))) },
+  invoices:{ name: "發票登錄總數", unit: "次", daily: buildSeries([16,20,24,33,41,114,61,53,45], (i,d) => Math.max(6, Math.round(29 + 9*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?7:0) - i*0.22))) },
+  cans:    { name: "登錄總罐數", unit: "罐", daily: buildSeries([295,369,443,590,738,2066,1107,959,814], (i,d) => Math.max(80, Math.round(520 + 160*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?90:0) - i*4))) }
 };
 Object.values(METRICS).forEach(m => { m.total = m.daily.reduce((a,b)=>a+b,0); });
 const state = { metric: "cans", grain: "day", start: 0, end: 13, loginView: "product", sortKey: "clicks", sortDir: "desc", q: "", funnelKey: "scan" };
@@ -577,7 +579,7 @@ function updateDailyChart() {
         }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { family: "Noto Sans TC", size: 11 }, color: "#6F6A64", autoSkip: true, maxTicksLimit: 10, maxRotation: 0 }, border: { color: "#E4DBD2" } },
+        x: { grid: { display: false }, ticks: { font: { family: "Noto Sans TC", size: 10 }, color: "#6F6A64", autoSkip: true, maxTicksLimit: 8, maxRotation: 0 }, border: { color: "#E4DBD2" } },
         y: {
           beginAtZero: true, grace: "8%",
           ticks: { font: { family: "Noto Sans TC", size: 11 }, color: "#6F6A64", callback: v => fmt(v) },
