@@ -153,6 +153,43 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 .caret { font-size: 10px; margin-left: 4px; }
 .foot-note { font-size: 11px; color: var(--faint); padding: 0 4px; }
 
+.game-split { display: grid; grid-template-columns: 1.05fr .95fr; gap: 20px; padding: 24px 24px 8px; }
+.game-block h3 { font-size: 14px; font-weight: 700; }
+.game-block .why { font-size: 12px; color: var(--muted); margin: 4px 0 14px; }
+.funnel { display: flex; flex-direction: column; }
+.funnel-row { display: grid; grid-template-columns: 1fr; }
+.fbar {
+  height: 42px; border-radius: 6px; background: var(--green); color: #fff;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 12px;
+  font-size: 12px; font-weight: 600; min-width: 88px;
+}
+.fbar .fn { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 8px; }
+.fbar .fv { font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.fdrop { font-size: 11px; color: #B45309; padding: 5px 0 5px 8px; font-weight: 600; }
+.fdrop.ok { color: var(--green); }
+.leak {
+  margin-top: 12px; padding: 10px 12px; border-radius: 8px;
+  background: #FFF6DF; border: 1px solid #E8D7A0; font-size: 12px; color: #8A6414;
+}
+.leak b { color: #6B4E10; }
+.path-starts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.path-starts button {
+  height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line-strong);
+  background: #fff; font-size: 12px; font-weight: 600; color: var(--muted);
+}
+.path-starts button.on { background: var(--green); border-color: var(--green); color: #fff; }
+.path-list { display: flex; flex-direction: column; gap: 8px; }
+.path-row { display: grid; grid-template-columns: 1fr 92px; gap: 8px; align-items: center; }
+.path-row .lab { font-size: 12px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.path-row .track { height: 10px; background: #F3EEE8; border-radius: 999px; overflow: hidden; grid-column: 1; }
+.path-row .fill { height: 100%; border-radius: 999px; background: var(--green); }
+.path-row.leave .fill { background: #C45C26; }
+.path-row.leave .lab { color: #C45C26; }
+.path-row .num { font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+.path-row .num em { font-style: normal; color: var(--muted); margin-left: 6px; }
+@media (max-width: 1100px) { .game-split { grid-template-columns: 1fr; } }
+
+
 .range-box { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
 .range-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
 .range-label { font-size: 13px; color: var(--muted); }
@@ -356,7 +393,24 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 
       <section class="card section" id="game">
         <div class="card-h">
-          <h2>遊戲追蹤<span class="sub">點擊任一指標欄即可排序</span></h2>
+          <h2>遊戲追蹤<span class="sub">看路徑、看流失、再對按鈕</span></h2>
+        </div>
+        <div class="game-split">
+          <div class="game-block">
+            <h3>路徑漏斗</h3>
+            <p class="why">核心任務一路走下來，哪一步人不見了。</p>
+            <div class="funnel" id="funnel"></div>
+            <div class="leak" id="funnelLeak"></div>
+          </div>
+          <div class="game-block">
+            <h3>下一步流向</h3>
+            <p class="why">點一個按鈕，看大家接著按什麼。橘色是離開。</p>
+            <div class="path-starts" id="pathStarts"></div>
+            <div class="path-list" id="pathList"></div>
+          </div>
+        </div>
+        <div class="card-h" style="border-top:1px solid var(--line)">
+          <h2 style="font-size:14px">按鈕明細</h2>
           <div class="table-tools">
             <input class="search" id="gameSearch" type="search" placeholder="搜尋按鈕名稱" />
           </div>
@@ -406,7 +460,7 @@ const METRICS = {
   cans:    { name: "登錄罐數", unit: "罐", daily: buildSeries([295,369,443,590,738,2066,1107,959,814], (i,d) => Math.max(80, Math.round(520 + 160*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?90:0) - i*4))) }
 };
 Object.values(METRICS).forEach(m => { m.total = m.daily.reduce((a,b)=>a+b,0); });
-const state = { metric: "cans", grain: "day", start: 0, end: 13, loginView: "product", sortKey: "clicks", sortDir: "desc", q: "" };
+const state = { metric: "cans", grain: "day", start: 0, end: 13, loginView: "product", sortKey: "clicks", sortDir: "desc", q: "", pathFrom: "首頁_進入活動" };
 let dailyChart, loginChart, bubbleChart;
 function sliceOf(arr) { return arr.slice(state.start, state.end + 1); }
 function weekBuckets(arr) {
@@ -722,6 +776,94 @@ const GAME = [
   { btn: "活動頁_元大0050說明", clicks: 287, users: 176 },
   { btn: "我的頁_兌換紀錄", clicks: 164, users: 98 }
 ].map(r => ({ ...r, avg: r.clicks / r.users }));
+
+const FUNNEL = [
+  { btn: "首頁_進入活動", n: 1840 },
+  { btn: "首頁_立即登錄發票", n: 512 },
+  { btn: "登錄頁_完成登錄", n: 407 },
+  { btn: "遊戲頁_開始抽獎", n: 356 },
+  { btn: "遊戲頁_完成抽獎", n: 198 },
+  { btn: "首頁_分享活動", n: 89 }
+];
+const PATHS = {
+  "首頁_進入活動": [
+    { to: "首頁_立即登錄發票", n: 512 },
+    { to: "首頁_活動辦法", n: 312 },
+    { to: "首頁_我的AI裝備", n: 210 },
+    { to: "離開", n: 806 }
+  ],
+  "首頁_立即登錄發票": [
+    { to: "登錄頁_掃描發票", n: 268 },
+    { to: "登錄頁_手動輸入", n: 139 },
+    { to: "離開", n: 105 }
+  ],
+  "登錄頁_掃描發票": [
+    { to: "遊戲頁_開始抽獎", n: 241 },
+    { to: "登錄頁_手動輸入", n: 48 },
+    { to: "離開", n: 118 }
+  ],
+  "登錄頁_手動輸入": [
+    { to: "遊戲頁_開始抽獎", n: 115 },
+    { to: "離開", n: 174 }
+  ],
+  "遊戲頁_開始抽獎": [
+    { to: "遊戲頁_完成抽獎", n: 198 },
+    { to: "遊戲頁_再玩一次", n: 42 },
+    { to: "離開", n: 116 }
+  ],
+  "遊戲頁_完成抽獎": [
+    { to: "首頁_分享活動", n: 89 },
+    { to: "我的頁_查看點數", n: 61 },
+    { to: "離開", n: 48 }
+  ],
+  "首頁_我的AI裝備": [
+    { to: "首頁_立即登錄發票", n: 96 },
+    { to: "離開", n: 202 }
+  ]
+};
+function renderFunnel() {
+  const max = FUNNEL[0].n;
+  const el = document.getElementById("funnel");
+  let out = "";
+  let worst = { drop: -1 };
+  FUNNEL.forEach((step, i) => {
+    const w = Math.max(18, step.n / max * 100);
+    out += '<div class="funnel-row"><div class="fbar" style="width:' + w.toFixed(1) + '%">' +
+      '<span class="fn">' + step.btn + '</span><span class="fv">' + fmt(step.n) + ' 人</span></div></div>';
+    if (i < FUNNEL.length - 1) {
+      const next = FUNNEL[i+1];
+      const drop = (1 - next.n / step.n) * 100;
+      if (drop > worst.drop) worst = { drop, from: step.btn, to: next.btn, lost: step.n - next.n };
+      const cls = drop >= 25 ? "fdrop" : "fdrop ok";
+      out += '<div class="' + cls + '">↓ 流失 ' + drop.toFixed(0) + '%　' + fmt(step.n - next.n) + ' 人沒走到下一步</div>';
+    }
+  });
+  el.innerHTML = out;
+  document.getElementById("funnelLeak").innerHTML =
+    "最大缺口在 <b>" + worst.from + "</b> → <b>" + worst.to + "</b>，掉了 <b>" + worst.drop.toFixed(0) + "%</b>（" + fmt(worst.lost) + " 人）。";
+}
+function renderPath() {
+  const starts = document.getElementById("pathStarts");
+  const keys = Object.keys(PATHS);
+  if (!state.pathFrom || !PATHS[state.pathFrom]) state.pathFrom = keys[0];
+  starts.innerHTML = keys.map(k =>
+    '<button type="button" data-from="' + k + '" class="' + (k===state.pathFrom?"on":"") + '">' + k + "</button>"
+  ).join("");
+  starts.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => { state.pathFrom = btn.dataset.from; renderPath(); });
+  });
+  const rows = [...PATHS[state.pathFrom]].sort((a,b)=>b.n-a.n);
+  const tot = rows.reduce((s,r)=>s+r.n,0);
+  const max = Math.max(...rows.map(r=>r.n));
+  document.getElementById("pathList").innerHTML = rows.map(r => {
+    const leave = r.to === "離開";
+    return '<div class="path-row' + (leave?" leave":"") + '">' +
+      '<div class="lab">' + (leave ? "離開網站" : r.to) + "</div>" +
+      '<div class="num"><b>' + fmt(r.n) + "</b><em>" + (r.n/tot*100).toFixed(0) + "%</em></div>" +
+      '<div class="track"><div class="fill" style="width:' + (r.n/max*100).toFixed(1) + '%"></div></div></div>';
+  }).join("");
+}
+
 function renderGame() {
   const q = state.q.trim().toLowerCase();
   let rows = GAME.filter(r => r.btn.toLowerCase().includes(q));
@@ -809,6 +951,8 @@ renderBars(document.getElementById("ageBars"), AGE, 640);
 renderBars(document.getElementById("regionBars"), REGION, 640);
 updateLoginChart();
 renderBubble();
+renderFunnel();
+renderPath();
 renderGame();
 bindNav();
 if (location.hash) {
