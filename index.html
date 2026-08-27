@@ -73,11 +73,11 @@ a { color: inherit; text-decoration: none; }
 .card-h .sub { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
 .card-b { padding: 24px; }
 .camp { display: flex; align-items: center; gap: 16px; padding: 16px 24px; }
-.camp { flex-wrap: wrap; }
-.camp-kv { width: 100%; height: 200px; border-radius: 8px 8px 0 0; overflow: hidden; background: #04150d; line-height: 0; }
-.camp-kv img { width: 100%; height: 100%; object-fit: cover; object-position: center 28%; display: block; }
-.thumb { width: 160px; aspect-ratio: 16 / 9; height: auto; border-radius: 8px; overflow: hidden; flex-shrink: 0; box-shadow: var(--shadow); line-height: 0; background: #0B5C38; }
-.thumb img, .thumb svg { display: block; width: 100%; height: 100%; object-fit: cover; }
+.camp-kv {
+  width: 92px; flex-shrink: 0; border-radius: 8px; overflow: hidden;
+  background: #04150d; line-height: 0; box-shadow: var(--shadow);
+}
+.camp-kv img { display: block; width: 100%; height: auto; }
 .camp-main { flex: 1; min-width: 0; }
 .camp-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .camp-title { font-size: 18px; font-weight: 700; }
@@ -156,7 +156,16 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 .caret { font-size: 10px; margin-left: 4px; }
 .foot-note { font-size: 11px; color: var(--faint); padding: 0 4px; }
 
-.game-split { display: grid; grid-template-columns: 1.05fr .95fr; gap: 20px; padding: 24px 24px 8px; }
+.game-split { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; padding: 24px 24px 8px; }
+.funnel-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.rank-list { display: flex; flex-direction: column; gap: 10px; }
+.rank-row { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; }
+.rank-row .i { font-size: 12px; color: var(--faint); font-weight: 700; }
+.rank-row .lab { font-size: 13px; font-weight: 600; }
+.rank-row .sub { font-size: 11px; color: var(--muted); font-weight: 400; }
+.rank-row .num { font-size: 13px; font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; }
+.rank-row .track { grid-column: 2 / 4; height: 8px; background: #F3EEE8; border-radius: 999px; overflow: hidden; }
+.rank-row .fill { height: 100%; background: var(--green); border-radius: 999px; }
 .game-block h3 { font-size: 14px; font-weight: 700; }
 .game-block .why { font-size: 12px; color: var(--muted); margin: 4px 0 14px; }
 .funnel { display: flex; flex-direction: column; }
@@ -262,8 +271,8 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
     </nav>
     <main class="page">
       <section class="card" id="header">
-        <div class="camp-kv"><img src="campaign.png" alt="台啤 AI 鏈鏈看"></div>
         <div class="camp">
+          <div class="camp-kv"><img src="campaign.png" alt="台啤 AI 鏈鏈看"></div>
           <div class="camp-main">
             <div class="camp-title-row">
               <h1 class="camp-title">台啤 AI 鏈鏈看 · 買台啤抽元大 0050</h1>
@@ -387,15 +396,15 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
         <div class="game-split">
           <div class="game-block">
             <h3>路徑漏斗</h3>
-            <p class="why">核心任務一路走下來，哪一步人不見了。</p>
+            <p class="why">一個分頁一條路徑。標籤格式：頁面_按鈕。</p>
+            <div class="funnel-tabs" id="funnelTabs"></div>
             <div class="funnel" id="funnel"></div>
             <div class="leak" id="funnelLeak"></div>
           </div>
           <div class="game-block">
-            <h3>下一步流向</h3>
-            <p class="why">點一個按鈕，看大家接著按什麼。橘色是離開。</p>
-            <div class="path-starts" id="pathStarts"></div>
-            <div class="path-list" id="pathList"></div>
+            <h3>最常用功能</h3>
+            <p class="why">功能用量排名，不是路徑。</p>
+            <div class="rank-list" id="rankList"></div>
           </div>
         </div>
         <div class="card-h" style="border-top:1px solid var(--line)">
@@ -449,7 +458,7 @@ const METRICS = {
   cans:    { name: "登錄罐數", unit: "罐", daily: buildSeries([295,369,443,590,738,2066,1107,959,814], (i,d) => Math.max(80, Math.round(520 + 160*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?90:0) - i*4))) }
 };
 Object.values(METRICS).forEach(m => { m.total = m.daily.reduce((a,b)=>a+b,0); });
-const state = { metric: "cans", grain: "day", start: 0, end: 13, loginView: "product", sortKey: "clicks", sortDir: "desc", q: "", pathFrom: "首頁_進入活動" };
+const state = { metric: "cans", grain: "day", start: 0, end: 13, loginView: "product", sortKey: "clicks", sortDir: "desc", q: "", funnelKey: "scan" };
 let dailyChart, loginChart, bubbleChart;
 function sliceOf(arr) { return arr.slice(state.start, state.end + 1); }
 function weekBuckets(arr) {
@@ -754,73 +763,104 @@ function renderBubble() {
   });
 }
 const GAME = [
-  { btn: "首頁_立即登錄發票", clicks: 1842, users: 512 },
-  { btn: "登錄頁_掃描發票", clicks: 1296, users: 407 },
-  { btn: "遊戲頁_開始抽獎", clicks: 1108, users: 356 },
-  { btn: "首頁_我的AI裝備", clicks: 876, users: 298 },
-  { btn: "登錄頁_手動輸入", clicks: 754, users: 289 },
-  { btn: "首頁_分享活動", clicks: 621, users: 241 },
-  { btn: "首頁_活動辦法", clicks: 498, users: 312 },
-  { btn: "我的頁_查看點數", clicks: 412, users: 198 },
-  { btn: "活動頁_元大0050說明", clicks: 287, users: 176 },
-  { btn: "我的頁_兌換紀錄", clicks: 164, users: 98 }
+  { btn: "首頁_開始遊戲", clicks: 2140, users: 1840 },
+  { btn: "遊戲規則_登錄發票", clicks: 1296, users: 640 },
+  { btn: "首頁_我的AI裝備", clicks: 1188, users: 512 },
+  { btn: "登錄發票_掃描_確認", clicks: 902, users: 407 },
+  { btn: "我的AI裝備_裝備交換", clicks: 754, users: 289 },
+  { btn: "獲得裝備_我的AI裝備", clicks: 688, users: 356 },
+  { btn: "裝備組合_0050_解鎖", clicks: 421, users: 198 },
+  { btn: "首頁_中獎名單", clicks: 398, users: 241 },
+  { btn: "首頁_發票驗證進度", clicks: 312, users: 176 },
+  { btn: "獲得裝備_每日手登抽", clicks: 287, users: 164 },
+  { btn: "登錄發票_手動_確認", clicks: 264, users: 139 },
+  { btn: "登錄發票_載具_確認", clicks: 188, users: 98 },
+  { btn: "活動辦法_同意", clicks: 176, users: 152 },
+  { btn: "裝備組合_火球票_解鎖", clicks: 154, users: 86 },
+  { btn: "我的AI裝備_交換紀錄", clicks: 121, users: 74 }
 ].map(r => ({ ...r, avg: r.clicks / r.users }));
 
-const FUNNEL = [
-  { btn: "首頁_進入活動", n: 1840 },
-  { btn: "首頁_立即登錄發票", n: 512 },
-  { btn: "登錄頁_完成登錄", n: 407 },
-  { btn: "遊戲頁_開始抽獎", n: 356 },
-  { btn: "遊戲頁_完成抽獎", n: 198 },
-  { btn: "首頁_分享活動", n: 89 }
-];
-const PATHS = {
-  "首頁_進入活動": [
-    { to: "首頁_立即登錄發票", n: 512 },
-    { to: "首頁_活動辦法", n: 312 },
-    { to: "首頁_我的AI裝備", n: 210 },
-    { to: "離開", n: 806 }
-  ],
-  "首頁_立即登錄發票": [
-    { to: "登錄頁_掃描發票", n: 268 },
-    { to: "登錄頁_手動輸入", n: 139 },
-    { to: "離開", n: 105 }
-  ],
-  "登錄頁_掃描發票": [
-    { to: "遊戲頁_開始抽獎", n: 241 },
-    { to: "登錄頁_手動輸入", n: 48 },
-    { to: "離開", n: 118 }
-  ],
-  "登錄頁_手動輸入": [
-    { to: "遊戲頁_開始抽獎", n: 115 },
-    { to: "離開", n: 174 }
-  ],
-  "遊戲頁_開始抽獎": [
-    { to: "遊戲頁_完成抽獎", n: 198 },
-    { to: "遊戲頁_再玩一次", n: 42 },
-    { to: "離開", n: 116 }
-  ],
-  "遊戲頁_完成抽獎": [
-    { to: "首頁_分享活動", n: 89 },
-    { to: "我的頁_查看點數", n: 61 },
-    { to: "離開", n: 48 }
-  ],
-  "首頁_我的AI裝備": [
-    { to: "首頁_立即登錄發票", n: 96 },
-    { to: "離開", n: 202 }
-  ]
+const FUNNELS = {
+  scan: {
+    label: "掃描登錄",
+    steps: [
+      { btn: "首頁_開始遊戲", n: 1840 },
+      { btn: "遊戲規則_登錄發票", n: 640 },
+      { btn: "登錄發票_掃描_確認", n: 407 },
+      { btn: "SUCCESS_確定組裝", n: 298 },
+      { btn: "獲得裝備_我的AI裝備", n: 241 }
+    ]
+  },
+  manual: {
+    label: "手動登錄",
+    steps: [
+      { btn: "首頁_開始遊戲", n: 1840 },
+      { btn: "遊戲規則_登錄發票", n: 640 },
+      { btn: "登錄發票_手動_確認", n: 139 },
+      { btn: "SUCCESS_確定組裝", n: 118 },
+      { btn: "獲得裝備_每日手登抽", n: 86 }
+    ]
+  },
+  carrier: {
+    label: "載具登錄",
+    steps: [
+      { btn: "首頁_開始遊戲", n: 1840 },
+      { btn: "遊戲規則_登錄發票", n: 640 },
+      { btn: "登錄發票_載具_確認", n: 98 },
+      { btn: "SUCCESS_確定組裝", n: 61 },
+      { btn: "獲得裝備_我的AI裝備", n: 44 }
+    ]
+  },
+  swap: {
+    label: "裝備交換",
+    steps: [
+      { btn: "首頁_我的AI裝備", n: 512 },
+      { btn: "我的AI裝備_裝備交換", n: 289 },
+      { btn: "裝備交換_下一步", n: 176 },
+      { btn: "我的AI裝備_交換紀錄", n: 74 }
+    ]
+  },
+  combo: {
+    label: "組合抽獎",
+    steps: [
+      { btn: "首頁_我的AI裝備", n: 512 },
+      { btn: "裝備組合_0050_解鎖", n: 198 },
+      { btn: "元大0050_成功抽_查看中獎名單", n: 89 },
+      { btn: "中獎名單_Phase 1", n: 61 }
+    ]
+  }
 };
+const RANKS = [
+  { name: "登錄發票", sub: "遊戲規則_登錄發票 + 掃描/手動/載具_確認", n: 1644 },
+  { name: "查看裝備", sub: "首頁_我的AI裝備 + 獲得裝備_我的AI裝備", n: 868 },
+  { name: "開始遊戲", sub: "首頁_開始遊戲", n: 1840 },
+  { name: "交換裝備", sub: "我的AI裝備_裝備交換", n: 289 },
+  { name: "組合解鎖", sub: "裝備組合_*_解鎖", n: 284 },
+  { name: "中獎名單", sub: "首頁_中獎名單", n: 241 },
+  { name: "每日手登抽", sub: "獲得裝備_每日手登抽", n: 164 }
+].sort((a,b) => b.n - a.n);
+
 function renderFunnel() {
-  const max = FUNNEL[0].n;
+  const tabs = document.getElementById("funnelTabs");
+  const keys = Object.keys(FUNNELS);
+  if (!state.funnelKey || !FUNNELS[state.funnelKey]) state.funnelKey = keys[0];
+  tabs.innerHTML = keys.map(k =>
+    '<button type="button" class="preset' + (k===state.funnelKey?" on":"") + '" data-funnel="' + k + '">' + FUNNELS[k].label + "</button>"
+  ).join("");
+  tabs.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => { state.funnelKey = btn.dataset.funnel; renderFunnel(); });
+  });
+  const steps = FUNNELS[state.funnelKey].steps;
+  const max = steps[0].n;
   const el = document.getElementById("funnel");
   let out = "";
   let worst = { drop: -1 };
-  FUNNEL.forEach((step, i) => {
+  steps.forEach((step, i) => {
     const w = Math.max(18, step.n / max * 100);
     out += '<div class="funnel-row"><div class="fbar" style="width:' + w.toFixed(1) + '%">' +
       '<span class="fn">' + step.btn + '</span><span class="fv">' + fmt(step.n) + ' 人</span></div></div>';
-    if (i < FUNNEL.length - 1) {
-      const next = FUNNEL[i+1];
+    if (i < steps.length - 1) {
+      const next = steps[i+1];
       const drop = (1 - next.n / step.n) * 100;
       if (drop > worst.drop) worst = { drop, from: step.btn, to: next.btn, lost: step.n - next.n };
       const cls = drop >= 25 ? "fdrop" : "fdrop ok";
@@ -829,28 +869,16 @@ function renderFunnel() {
   });
   el.innerHTML = out;
   document.getElementById("funnelLeak").innerHTML =
-    "最大缺口在 <b>" + worst.from + "</b> → <b>" + worst.to + "</b>，掉了 <b>" + worst.drop.toFixed(0) + "%</b>（" + fmt(worst.lost) + " 人）。";
+    "這條路徑最大缺口：<b>" + worst.from + "</b> → <b>" + worst.to + "</b>，掉了 <b>" + worst.drop.toFixed(0) + "%</b>（" + fmt(worst.lost) + " 人）。";
 }
-function renderPath() {
-  const starts = document.getElementById("pathStarts");
-  const keys = Object.keys(PATHS);
-  if (!state.pathFrom || !PATHS[state.pathFrom]) state.pathFrom = keys[0];
-  starts.innerHTML = keys.map(k =>
-    '<button type="button" data-from="' + k + '" class="' + (k===state.pathFrom?"on":"") + '">' + k + "</button>"
+function renderRank() {
+  const max = RANKS[0].n;
+  document.getElementById("rankList").innerHTML = RANKS.map((r, i) =>
+    '<div class="rank-row"><div class="i">' + (i+1) + '</div>' +
+    '<div><div class="lab">' + r.name + '</div><div class="sub">' + r.sub + "</div></div>" +
+    '<div class="num">' + fmt(r.n) + " 人</div>" +
+    '<div class="track"><div class="fill" style="width:' + (r.n/max*100).toFixed(1) + '%"></div></div></div>'
   ).join("");
-  starts.querySelectorAll("button").forEach(btn => {
-    btn.addEventListener("click", () => { state.pathFrom = btn.dataset.from; renderPath(); });
-  });
-  const rows = [...PATHS[state.pathFrom]].sort((a,b)=>b.n-a.n);
-  const tot = rows.reduce((s,r)=>s+r.n,0);
-  const max = Math.max(...rows.map(r=>r.n));
-  document.getElementById("pathList").innerHTML = rows.map(r => {
-    const leave = r.to === "離開";
-    return '<div class="path-row' + (leave?" leave":"") + '">' +
-      '<div class="lab">' + (leave ? "離開網站" : r.to) + "</div>" +
-      '<div class="num"><b>' + fmt(r.n) + "</b><em>" + (r.n/tot*100).toFixed(0) + "%</em></div>" +
-      '<div class="track"><div class="fill" style="width:' + (r.n/max*100).toFixed(1) + '%"></div></div></div>';
-  }).join("");
 }
 
 function renderGame() {
@@ -941,7 +969,7 @@ renderBars(document.getElementById("regionBars"), REGION, 640);
 updateLoginChart();
 renderBubble();
 renderFunnel();
-renderPath();
+renderRank();
 renderGame();
 bindNav();
 if (location.hash) {
