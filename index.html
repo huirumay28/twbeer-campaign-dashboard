@@ -156,6 +156,23 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 .caret { font-size: 10px; margin-left: 4px; }
 .foot-note { font-size: 11px; color: var(--faint); padding: 0 4px; }
 
+.sec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 0 4px; }
+.sec-head h2 { font-size: 15px; font-weight: 700; }
+.dd { position: relative; }
+.dd-menu {
+  display: none; position: absolute; right: 0; top: calc(100% + 4px); z-index: 20;
+  min-width: 148px; background: #fff; border: 1px solid var(--line-strong); border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(28,24,20,.12); padding: 4px;
+}
+.dd.open .dd-menu { display: block; }
+.dd-menu button {
+  display: block; width: 100%; text-align: left; border: 0; background: transparent;
+  padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--text);
+}
+.dd-menu button:hover { background: var(--green-pale); color: var(--green); }
+.head-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+
+
 .game-split { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; padding: 24px 24px 8px; }
 .funnel-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
 .rank-list { display: flex; flex-direction: column; }
@@ -306,10 +323,19 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
       <section class="card section" id="daily">
         <div class="card-h">
           <h2>專案成效總覽<span class="sub">點選指標，圖表只顯示該數列</span></h2>
-          <div class="qual">
-            <span class="pill">合格掃描登錄總數 <b>268</b> 次</span>
-            <span class="pill">合格手動輸入總數 <b>316</b> 次</span>
-            <span class="pill">合格載具輸入總數 <b>421</b> 次</span>
+          <div class="head-right">
+            <div class="qual">
+              <span class="pill">合格掃描登錄總數 <b>268</b> 次</span>
+              <span class="pill">合格手動輸入總數 <b>316</b> 次</span>
+              <span class="pill">合格載具輸入總數 <b>421</b> 次</span>
+            </div>
+            <div class="dd">
+              <button type="button" class="btn dd-toggle" aria-haspopup="true">下載</button>
+              <div class="dd-menu">
+                <button type="button" data-dl="csv">下載 CSV</button>
+                <button type="button" data-dl="chart">下載圖表</button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="card-b">
@@ -341,12 +367,21 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
           </div>
           <div class="chart-foot">
             <div>合計 <strong id="seriesSum">7,381</strong> <span id="seriesUnit">罐</span></div>
-            <div><button class='btn' type='button'>下載圖表</button></div>
           </div>
         </div>
       </section>
 
       <section class="section" id="consumer">
+        <div class="sec-head">
+          <h2>消費者資訊</h2>
+          <div class="dd">
+              <button type="button" class="btn dd-toggle" aria-haspopup="true">下載</button>
+              <div class="dd-menu">
+                <button type="button" data-dl="csv">下載 CSV</button>
+                <button type="button" data-dl="chart">下載圖表</button>
+              </div>
+            </div>
+        </div>
         <div class="grid-3">
           <article class="card">
             <div class="card-b">
@@ -372,11 +407,20 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
       <section class="card section" id="login">
         <div class="card-h">
           <h2>登錄<span class="sub">產品 · 通路 · 來源 · 時段　單一檢視</span></h2>
-          <div class="seg" role="tablist" id="loginSeg">
-            <button type="button" class="on" data-view="product">產品</button>
-            <button type="button" data-view="channel">通路</button>
-            <button type="button" data-view="source">來源</button>
-            <button type="button" data-view="hour">時段</button>
+          <div class="head-right">
+            <div class="seg" role="tablist" id="loginSeg">
+              <button type="button" class="on" data-view="product">產品</button>
+              <button type="button" data-view="channel">通路</button>
+              <button type="button" data-view="source">來源</button>
+              <button type="button" data-view="hour">時段</button>
+            </div>
+            <div class="dd">
+              <button type="button" class="btn dd-toggle" aria-haspopup="true">下載</button>
+              <div class="dd-menu">
+                <button type="button" data-dl="csv">下載 CSV</button>
+                <button type="button" data-dl="chart">下載圖表</button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="card-b">
@@ -388,7 +432,13 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
       <section class="card section" id="amount">
         <div class="card-h">
           <h2>消費金額與次數 <span class="sub">（人數統計）</span></h2>
-          <button class="btn" type="button">下載 CSV檔</button>
+          <div class="dd">
+              <button type="button" class="btn dd-toggle" aria-haspopup="true">下載</button>
+              <div class="dd-menu">
+                <button type="button" data-dl="csv">下載 CSV</button>
+                <button type="button" data-dl="chart">下載圖表</button>
+              </div>
+            </div>
         </div>
         <div class="card-b">
           <div class="bubble-wrap"><canvas id="bubbleChart"></canvas></div>
@@ -401,19 +451,26 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 
       <section class="card section" id="game">
         <div class="card-h">
-          <h2>遊戲追蹤<span class="sub">看路徑、看流失、再對按鈕</span></h2>
+          <h2>遊戲追蹤<span class="sub">路徑分類與流失</span></h2>
+          <div class="dd">
+              <button type="button" class="btn dd-toggle" aria-haspopup="true">下載</button>
+              <div class="dd-menu">
+                <button type="button" data-dl="csv">下載 CSV</button>
+                <button type="button" data-dl="chart">下載圖表</button>
+              </div>
+            </div>
         </div>
         <div class="game-split">
           <div class="game-block">
             <h3>路徑漏斗</h3>
-            <p class="why">一個分頁一條路徑。標籤格式：頁面_按鈕。</p>
+            <p class="why">一個分頁一條功能路徑。</p>
             <div class="funnel-tabs" id="funnelTabs"></div>
             <div class="funnel" id="funnel"></div>
             <div class="leak" id="funnelLeak"></div>
           </div>
           <div class="game-block">
             <h3>最常用功能</h3>
-            <p class="why">功能用量排名，不是路徑。</p>
+            <p class="why">依路徑漏斗分類排名。</p>
             <div class="rank-list" id="rankList"></div>
           </div>
         </div>
@@ -469,7 +526,7 @@ const METRICS = {
   cans:    { name: "登錄總罐數", unit: "罐", daily: buildSeries([295,369,443,590,738,2066,1107,959,814], (i,d) => Math.max(80, Math.round(520 + 160*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?90:0) - i*4))) }
 };
 Object.values(METRICS).forEach(m => { m.total = m.daily.reduce((a,b)=>a+b,0); });
-const state = { metric: "cans", grain: "day", start: 0, end: 13, loginView: "product", sortKey: "clicks", sortDir: "desc", q: "", funnelKey: "scan" };
+const state = { metric: "cans", grain: "day", start: 0, end: 13, loginView: "product", sortKey: "clicks", sortDir: "desc", q: "", funnelKey: "invoice" };
 let dailyChart, loginChart, bubbleChart;
 function sliceOf(arr) { return arr.slice(state.start, state.end + 1); }
 function weekBuckets(arr) {
@@ -792,38 +849,33 @@ const GAME = [
 ].map(r => ({ ...r, avg: r.clicks / r.users }));
 
 const FUNNELS = {
-  scan: {
-    label: "掃描登錄",
+  invoice: {
+    label: "登錄發票",
     steps: [
       { btn: "首頁_開始遊戲", n: 1840 },
       { btn: "遊戲規則_登錄發票", n: 640 },
       { btn: "登錄發票_掃描_確認", n: 407 },
-      { btn: "SUCCESS_確定組裝", n: 298 },
       { btn: "獲得裝備_我的AI裝備", n: 241 }
     ]
   },
-  manual: {
-    label: "手動登錄",
+  redeem: {
+    label: "兌換組合",
     steps: [
-      { btn: "首頁_開始遊戲", n: 1840 },
-      { btn: "遊戲規則_登錄發票", n: 640 },
-      { btn: "登錄發票_手動_確認", n: 139 },
-      { btn: "SUCCESS_確定組裝", n: 118 },
-      { btn: "獲得裝備_每日手登抽", n: 86 }
+      { btn: "首頁_我的AI裝備", n: 512 },
+      { btn: "裝備組合_0050_解鎖", n: 198 },
+      { btn: "元大0050_成功抽_查看中獎名單", n: 89 }
     ]
   },
-  carrier: {
-    label: "載具登錄",
+  inspect: {
+    label: "查詢我的裝備",
     steps: [
-      { btn: "首頁_開始遊戲", n: 1840 },
-      { btn: "遊戲規則_登錄發票", n: 640 },
-      { btn: "登錄發票_載具_確認", n: 98 },
-      { btn: "SUCCESS_確定組裝", n: 61 },
-      { btn: "獲得裝備_我的AI裝備", n: 44 }
+      { btn: "首頁_我的AI裝備", n: 512 },
+      { btn: "我的AI裝備_雲泡衛星", n: 298 },
+      { btn: "我的AI裝備_金牌 ONE 處理器", n: 176 }
     ]
   },
   swap: {
-    label: "裝備交換",
+    label: "交換裝備",
     steps: [
       { btn: "首頁_我的AI裝備", n: 512 },
       { btn: "我的AI裝備_裝備交換", n: 289 },
@@ -831,24 +883,21 @@ const FUNNELS = {
       { btn: "我的AI裝備_交換紀錄", n: 74 }
     ]
   },
-  combo: {
-    label: "組合抽獎",
+  assemble: {
+    label: "組裝 AI 裝備",
     steps: [
-      { btn: "首頁_我的AI裝備", n: 512 },
-      { btn: "裝備組合_0050_解鎖", n: 198 },
-      { btn: "元大0050_成功抽_查看中獎名單", n: 89 },
-      { btn: "中獎名單_Phase 1", n: 61 }
+      { btn: "登錄發票_掃描_確認", n: 407 },
+      { btn: "SUCCESS_確定組裝", n: 298 },
+      { btn: "獲得裝備_我的AI裝備", n: 241 }
     ]
   }
 };
 const RANKS = [
-  { name: "登錄發票", sub: "遊戲規則_登錄發票 + 掃描/手動/載具_確認", n: 1644 },
-  { name: "查看裝備", sub: "首頁_我的AI裝備 + 獲得裝備_我的AI裝備", n: 868 },
-  { name: "開始遊戲", sub: "首頁_開始遊戲", n: 1840 },
-  { name: "交換裝備", sub: "我的AI裝備_裝備交換", n: 289 },
-  { name: "組合解鎖", sub: "裝備組合_*_解鎖", n: 284 },
-  { name: "中獎名單", sub: "首頁_中獎名單", n: 241 },
-  { name: "每日手登抽", sub: "獲得裝備_每日手登抽", n: 164 }
+  { name: "登錄發票", sub: "路徑漏斗 · 登錄發票", n: 640 },
+  { name: "查詢我的裝備", sub: "路徑漏斗 · 查詢我的裝備", n: 512 },
+  { name: "組裝 AI 裝備", sub: "路徑漏斗 · 組裝 AI 裝備", n: 407 },
+  { name: "交換裝備", sub: "路徑漏斗 · 交換裝備", n: 289 },
+  { name: "兌換組合", sub: "路徑漏斗 · 兌換組合", n: 198 }
 ].sort((a,b) => b.n - a.n);
 
 function renderFunnel() {
@@ -918,6 +967,46 @@ function renderGame() {
     th.querySelector(".caret").textContent = on ? (state.sortDir === "desc" ? "↓" : "↑") : "";
   });
 }
+
+function downloadBlob(name, mime, text) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: mime }));
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 500);
+}
+function bindDownloads() {
+  document.querySelectorAll(".dd").forEach(dd => {
+    const toggle = dd.querySelector(".dd-toggle");
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.querySelectorAll(".dd.open").forEach(x => { if (x !== dd) x.classList.remove("open"); });
+      dd.classList.toggle("open");
+    });
+    dd.querySelectorAll("[data-dl]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const section = dd.closest(".section") || dd.closest("section");
+        const id = section ? section.id : "export";
+        const title = (section && section.querySelector("h2,h3")) ? section.querySelector("h2,h3").innerText.replace(/\s+/g," ").trim() : id;
+        if (btn.dataset.dl === "csv") {
+          downloadBlob(title + ".csv", "text/csv;charset=utf-8", "section,item\n" + id + "," + title + "\n");
+        } else {
+          const canvas = section ? section.querySelector("canvas") : null;
+          if (canvas) {
+            const a = document.createElement("a");
+            a.href = canvas.toDataURL("image/png");
+            a.download = title + ".png";
+            a.click();
+          } else {
+            downloadBlob(title + ".txt", "text/plain", title + " 圖表（示意匯出）\n");
+          }
+        }
+        dd.classList.remove("open");
+      });
+    });
+  });
+  document.addEventListener("click", () => document.querySelectorAll(".dd.open").forEach(x => x.classList.remove("open")));
+}
 function bindNav() {
   const chips = [...document.querySelectorAll(".chipbar .chip")];
   chips.forEach(c => c.addEventListener("click", () => {
@@ -982,6 +1071,8 @@ renderFunnel();
 renderRank();
 renderGame();
 bindNav();
+bindDownloads();
+
 if (location.hash) {
   const el = document.querySelector(location.hash);
   if (el) el.scrollIntoView();
