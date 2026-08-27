@@ -313,11 +313,10 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
               <span>資料同步 2026/08/27 13:33</span>
             </div>
           </div>
-          <div class="plus"><b>+374</b><em>會員</em></div>
+          <div class="plus"><b>+374</b></div>
           <div class="actions">
             <button class="btn" type="button">返回專案列表</button>
-            <button class="btn" type="button">編輯</button>
-            <button class="btn primary" type="button">下載 CSV</button>
+            <button class="btn primary" type="button" id="reportBtn">下載結案報告</button>
           </div>
         </div>
       </section>
@@ -1022,6 +1021,69 @@ function bindNav() {
   }, { rootMargin: "-20% 0px -60% 0px", threshold: 0.1 });
   ["daily","consumer","login","amount","game"].forEach(id => io.observe(document.getElementById(id)));
 }
+
+function buildReport() {
+  const kpis = Object.entries(METRICS).map(([k,m]) => {
+    const n = sliceOf(m.daily).reduce((a,b)=>a+b,0);
+    return m.name + "　" + fmt(n) + " " + m.unit;
+  }).join("\n");
+  const ranks = RANKS.map((r,i) => (i+1) + ". " + r.name + "　" + fmt(r.n) + " 人").join("\n");
+  const funnel = FUNNELS[state.funnelKey];
+  const fsteps = funnel.steps.map((s,i) => (i+1) + ". " + s.btn + "　" + fmt(s.n) + " 人").join("\n");
+  const gender = GENDER.map(g => g.label + "　" + g.pct.toFixed(1) + "%（" + fmt(g.n) + " 人）").join("\n");
+  const age = AGE.map(a => a.label + "　" + fmt(a.n)).join("\n");
+  const region = REGION.map(a => a.label + "　" + fmt(a.n)).join("\n");
+  const login = LOGIN[state.loginView];
+  const loginRows = login.labels.map((l,i) => l + "　" + login.data[i] + " " + login.unit).join("\n");
+  const bubbleN = BUBBLES.reduce((s,b)=>s+b[2],0);
+  return [
+    "台啤 AI 鏈鏈看 · 結案報告",
+    "================================",
+    "活動期間　2026/08/19–2026/10/02　進行中",
+    "資料同步　2026/08/27 13:33",
+    "會員成長　+374",
+    "檢視區間　" + rangeText(),
+    "",
+    "【專案成效總覽】",
+    kpis,
+    "合格掃描登錄總數　268 次",
+    "合格手動輸入總數　316 次",
+    "合格載具輸入總數　421 次",
+    "",
+    "【消費者資訊】總數 640 人",
+    gender,
+    "",
+    "年齡分佈",
+    age,
+    "",
+    "地區分佈",
+    region,
+    "",
+    "【登錄 · " + (state.loginView) + "】",
+    loginRows,
+    "",
+    "【消費金額】氣泡合計 " + fmt(bubbleN) + " 人",
+    "",
+    "【最常用功能｜路徑分類】",
+    ranks,
+    "",
+    "【路徑漏斗 · " + funnel.label + "】",
+    fsteps
+  ].join("\n");
+}
+function printReport() {
+  const text = buildReport();
+  downloadBlob("台啤AI鏈鏈看-結案報告.txt", "text/plain;charset=utf-8", text);
+  const w = window.open("", "_blank");
+  if (!w) return;
+  w.document.write("<!doctype html><html><head><meta charset='utf-8'><title>結案報告</title>");
+  w.document.write("<style>body{font-family:'Noto Sans TC',sans-serif;padding:32px;white-space:pre-wrap;line-height:1.6;color:#1c1c1c} h1{display:none}</style></head><body>");
+  w.document.write(text.replace(/</g,"&lt;"));
+  w.document.write("</body></html>");
+  w.document.close();
+  w.focus();
+  w.print();
+}
 function bindSlider() {
   const a = document.getElementById("rangeStart");
   const b = document.getElementById("rangeEnd");
@@ -1075,6 +1137,8 @@ renderRank();
 renderGame();
 bindNav();
 bindDownloads();
+document.getElementById('reportBtn').addEventListener('click', printReport);
+
 
 if (location.hash) {
   const el = document.querySelector(location.hash);
