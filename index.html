@@ -158,14 +158,23 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 
 .game-split { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; padding: 24px 24px 8px; }
 .funnel-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.rank-list { display: flex; flex-direction: column; gap: 10px; }
-.rank-row { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; }
-.rank-row .i { font-size: 12px; color: var(--faint); font-weight: 700; }
-.rank-row .lab { font-size: 13px; font-weight: 600; }
-.rank-row .sub { font-size: 11px; color: var(--muted); font-weight: 400; }
-.rank-row .num { font-size: 13px; font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; }
-.rank-row .track { grid-column: 2 / 4; height: 8px; background: #F3EEE8; border-radius: 999px; overflow: hidden; }
-.rank-row .fill { height: 100%; background: var(--green); border-radius: 999px; }
+.rank-list { display: flex; flex-direction: column; }
+.rank-row {
+  display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.rank-row:last-child { border-bottom: 0; }
+.rank-row .i {
+  width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 11px; font-weight: 700; color: var(--muted); background: #F3EEE8;
+}
+.rank-row:nth-child(1) .i { background: var(--green); color: #fff; }
+.rank-row:nth-child(2) .i { background: #5CB88A; color: #fff; }
+.rank-row:nth-child(3) .i { background: #CDE6D8; color: var(--green-deep); }
+.rank-row .lab { font-size: 14px; font-weight: 700; }
+.rank-row .sub { font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+.rank-row .num { font-size: 20px; font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.03em; line-height: 1; text-align: right; }
+.rank-row .share { display: block; font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 3px; text-align: right; }
 .game-block h3 { font-size: 14px; font-weight: 700; }
 .game-block .why { font-size: 12px; color: var(--muted); margin: 4px 0 14px; }
 .funnel { display: flex; flex-direction: column; }
@@ -872,12 +881,11 @@ function renderFunnel() {
     "這條路徑最大缺口：<b>" + worst.from + "</b> → <b>" + worst.to + "</b>，掉了 <b>" + worst.drop.toFixed(0) + "%</b>（" + fmt(worst.lost) + " 人）。";
 }
 function renderRank() {
-  const max = RANKS[0].n;
+  const tot = RANKS.reduce((s,r)=>s+r.n,0);
   document.getElementById("rankList").innerHTML = RANKS.map((r, i) =>
     '<div class="rank-row"><div class="i">' + (i+1) + '</div>' +
     '<div><div class="lab">' + r.name + '</div><div class="sub">' + r.sub + "</div></div>" +
-    '<div class="num">' + fmt(r.n) + " 人</div>" +
-    '<div class="track"><div class="fill" style="width:' + (r.n/max*100).toFixed(1) + '%"></div></div></div>'
+    '<div><div class="num">' + fmt(r.n) + '</div><span class="share">' + (r.n/tot*100).toFixed(0) + "% · 人</span></div></div>"
   ).join("");
 }
 
