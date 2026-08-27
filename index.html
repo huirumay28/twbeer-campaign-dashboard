@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>買台啤抽元大 0050 等值現金 · 專案成效分析 · TAIWAN BEER</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+:root {
+  --green: #007A49;
+  --green-deep: #00663D;
+  --green-active: #298F66;
+  --green-soft: #E6F3EC;
+  --green-mid: #5CB88A;
+  --green-pale: #F3F9F6;
+  --gold: #E0B34E;
+  --bg: #F1E8E1;
+  --card: #FFFFFF;
+  --text: #1C1C1C;
+  --muted: #6F6A64;
+  --faint: #9A948C;
+  --line: #E4DBD2;
+  --line-strong: #D4C9BE;
+  --sidebar: 224px;
+  --topbar: 56px;
+  --radius: 8px;
+  --shadow: 0 1px 2px rgba(28,24,20,.04), 0 1px 3px rgba(28,24,20,.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; color-scheme: light; }
+body {
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  background: var(--bg); color: var(--text); min-width: 1280px; line-height: 1.5;
+  color-scheme: light;
+}
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar);
+  background: var(--green); color: #fff; z-index: 40;
+  display: flex; flex-direction: column; padding: 24px 16px;
+}
+.brand { display: flex; align-items: center; gap: 12px; padding: 0 8px 24px; border-bottom: 1px solid rgba(255,255,255,.16); margin-bottom: 16px; }
+.brand-mark { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.85); display: grid; place-items: center; font-weight: 700; font-size: 15px; }
+.brand-word { display: flex; flex-direction: column; line-height: 1.1; gap: 2px; }
+.brand-word b { font-size: 13px; letter-spacing: .12em; font-weight: 700; }
+.brand-word span { font-size: 13px; letter-spacing: .18em; font-weight: 700; }
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,.88); font-size: 14px; font-weight: 500; }
+.nav a:hover { background: rgba(255,255,255,.1); color: #fff; }
+.nav a.active { background: var(--green-active); color: #fff; font-weight: 600; }
+.shell { margin-left: var(--sidebar); min-height: 100vh; min-width: 0; overflow-x: hidden; }
+.topbar { position: sticky; top: 0; z-index: 30; height: var(--topbar); background: #fff; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+.topbar-title { font-size: 16px; font-weight: 600; }
+.topbar-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; white-space: nowrap; }
+.demo-flag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; background: #FFF6DF; color: #8A6414; border: 1px solid #E8D7A0; font-size: 12px; font-weight: 600; }
+.user { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+.icon-btn { width: 32px; height: 32px; border: 0; background: transparent; color: var(--muted); border-radius: 8px; display: grid; place-items: center; }
+.icon-btn:hover { background: var(--green-soft); color: var(--green); }
+.crumbs { padding: 16px 24px 0; font-size: 12px; color: var(--muted); }
+.crumbs b { color: var(--text); font-weight: 500; }
+.chipbar { position: sticky; top: var(--topbar); z-index: 20; background: rgba(241,232,225,.92); backdrop-filter: blur(10px); padding: 12px 24px 8px; display: flex; gap: 8px; }
+.chip { height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: #fff; font-size: 13px; font-weight: 500; color: var(--muted); }
+.chip:hover { border-color: var(--green); color: var(--green); }
+.chip.on { background: var(--green); border-color: var(--green); color: #fff; }
+.page { padding: 16px 24px 48px; display: flex; flex-direction: column; gap: 16px; }
+.section { scroll-margin-top: 112px; }
+.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid rgba(228,219,210,.6); }
+.card-h { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--line); gap: 16px; }
+.card-h h2 { font-size: 15px; font-weight: 700; }
+.card-h .sub { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+.card-b { padding: 24px; }
+.camp { display: flex; align-items: center; gap: 16px; padding: 16px 24px; }
+.thumb { width: 160px; aspect-ratio: 16 / 9; height: auto; border-radius: 8px; overflow: hidden; flex-shrink: 0; box-shadow: var(--shadow); line-height: 0; background: #0B5C38; }
+.thumb svg { display: block; width: 100%; height: 100%; }
+.camp-main { flex: 1; min-width: 0; }
+.camp-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.camp-title { font-size: 18px; font-weight: 700; }
+.status { height: 22px; padding: 0 8px; border-radius: 999px; background: var(--green-soft); color: var(--green); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; }
+.camp-meta { margin-top: 6px; display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.camp-meta span { display: inline-flex; align-items: center; gap: 6px; }
+.plus { display: inline-flex; align-items: baseline; gap: 6px; padding: 8px 14px; border-radius: 8px; background: var(--green-pale); border: 1px solid #CDE6D8; }
+.plus b { font-size: 22px; color: var(--green); font-weight: 700; line-height: 1; }
+.plus em { font-style: normal; font-size: 12px; color: var(--muted); font-weight: 500; }
+.actions { display: flex; gap: 8px; }
+.btn { height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line-strong); background: #fff; font-size: 13px; font-weight: 500; color: var(--text); display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--green); color: var(--green); }
+.btn.primary { background: var(--green); border-color: var(--green); color: #fff; }
+.btn.primary:hover { background: var(--green-deep); }
+.btn:focus-visible, .chip:focus-visible, .kpi:focus-visible, .seg button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.kpi-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 16px; }
+.kpi { text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 16px; min-width: 0; transition: border-color .15s, background .15s; }
+.kpi:hover { border-color: var(--green-mid); }
+.kpi.on { border-color: var(--green); background: var(--green-pale); box-shadow: inset 3px 0 0 var(--green); }
+.kpi .k { font-size: 12px; color: var(--muted); font-weight: 500; line-height: 1.35; }
+.kpi .v { margin-top: 8px; font-size: 26px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+.kpi.on .v { color: var(--green); }
+.kpi .u { margin-top: 6px; font-size: 12px; color: var(--faint); }
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 16px; flex-wrap: wrap; }
+.hint { font-size: 12px; color: var(--muted); }
+.hint b { color: var(--text); font-weight: 600; }
+.seg { display: inline-flex; background: #F6F2EE; border-radius: 8px; padding: 2px; }
+.seg button { height: 28px; padding: 0 12px; border: 0; background: transparent; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.seg button.on { background: #fff; color: var(--green); box-shadow: var(--shadow); }
+.chart-wrap { position: relative; height: 288px; }
+.chart-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.chart-foot strong { color: var(--text); font-size: 15px; }
+.qual { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill { height: 24px; padding: 0 10px; border-radius: 999px; background: #F6F2EE; color: var(--muted); font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+.pill b { color: var(--text); font-weight: 600; }
+.grid-3 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.15fr) minmax(0,.9fr); gap: 16px; }
+.mini-h { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
+.mini-h h3 { font-size: 14px; font-weight: 700; }
+.total-chip { font-size: 12px; color: var(--muted); }
+.total-chip b { color: var(--green); font-weight: 700; }
+.donut-box { display: flex; align-items: center; gap: 16px; }
+.donut-box canvas { width: 148px !important; height: 148px !important; }
+.legend { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.legend li { display: grid; grid-template-columns: 10px 1fr auto; gap: 8px; align-items: center; font-size: 13px; list-style: none; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.legend .pct { font-weight: 700; }
+.legend .cnt { color: var(--muted); font-size: 12px; grid-column: 2; margin-top: -8px; }
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: grid; grid-template-columns: 52px 1fr 92px; gap: 8px; align-items: center; }
+.bar-row .lab { font-size: 12px; color: var(--muted); }
+.track { height: 10px; background: #F3EEE8; border-radius: 999px; overflow: hidden; }
+.fill { height: 100%; border-radius: 999px; background: var(--green); }
+.bar-row .num { font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+.bar-row .num b { font-weight: 600; }
+.bar-row .num em { font-style: normal; color: var(--muted); margin-left: 6px; }
+.hbar { position: relative; height: 280px; }
+.hbar.hours { height: 220px; }
+.bubble-wrap { position: relative; height: 420px; }
+.axis-note { font-size: 12px; color: var(--muted); }
+.table-tools { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.search { height: 36px; width: 280px; padding: 0 12px 0 32px; border: 1px solid var(--line-strong); border-radius: 8px; font-family: inherit; font-size: 13px; color: var(--text); background: #fff url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27 fill=%27none%27 stroke=%27%239A948C%27 stroke-width=%271.6%27 viewBox=%270 0 24 24%27%3E%3Ccircle cx=%2711%27 cy=%2711%27 r=%277%27/%3E%3Cpath d=%27M20 20l-3-3%27/%3E%3C/svg%3E") 10px 50% no-repeat; }
+.search:focus { outline: none; border-color: var(--green); }
+table.ga { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.ga th, table.ga td { padding: 12px 16px; border-bottom: 1px solid var(--line); text-align: right; }
+table.ga th:first-child, table.ga td:first-child { text-align: left; }
+table.ga thead th { font-size: 12px; font-weight: 600; color: var(--muted); background: #FAF7F4; user-select: none; }
+table.ga thead th.s { cursor: pointer; }
+table.ga thead th.s:hover { color: var(--green); }
+table.ga thead th.active { color: var(--green); }
+table.ga .totals { background: #F7F3EF; font-weight: 700; }
+table.ga .totals td { border-bottom: 1px solid var(--line-strong); }
+table.ga tbody tr:hover { background: #FBF9F6; }
+table.ga .dim { font-weight: 500; }
+table.ga .metric { font-variant-numeric: tabular-nums; font-weight: 600; }
+table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+.caret { font-size: 10px; margin-left: 4px; }
+.foot-note { font-size: 11px; color: var(--faint); padding: 0 4px; }
+
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">台</div>
+      <div class="brand-word"><b>TAIWAN</b><span>BEER</span></div>
+    </div>
+    <nav class="nav">
+      <a href="#top"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"/></svg>首頁</a>
+      <a href="#top"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M4 19c.4-3 2.4-5 5-5s4.6 2 5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M20.6 18.5c-.3-2.1-1.7-3.5-3.6-3.5"/></svg>會員查詢</a>
+      <a class="active" href="#daily"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>專案成效分析</a>
+      <a href="#top"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>帳號管理</a>
+      <a href="#top"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>權限管理</a>
+    </nav>
+  </aside>
+  <div class="shell" id="top">
+    <header class="topbar">
+      <div class="topbar-title">後台管理</div>
+      <div class="topbar-right">
+        <span class="demo-flag">Demo · 示意數據</span>
+        <div class="user">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.2"/><path d="M5 19c.6-3.4 3.2-5 7-5s6.4 1.6 7 5"/></svg>
+          twbeer01
+        </div>
+        <button class="icon-btn" type="button" title="登出" aria-label="登出">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 7V5a1 1 0 0 1 1-1h8v16h-8a1 1 0 0 1-1-1v-2"/><path d="M4 12h10M11 9l3 3-3 3"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="crumbs">專案管理 / 專案成效分析 / <b>買台啤抽元大 0050</b></div>
+    <nav class="chipbar" id="chipbar" aria-label="區塊導覽">
+      <button class="chip on" type="button" data-jump="daily">每日成效</button>
+      <button class="chip" type="button" data-jump="consumer">消費者</button>
+      <button class="chip" type="button" data-jump="login">登錄</button>
+      <button class="chip" type="button" data-jump="amount">登錄金額</button>
+      <button class="chip" type="button" data-jump="game">遊戲追蹤</button>
+    </nav>
+    <main class="page">
+      <section class="card" id="header">
+        <div class="camp">
+          <div class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+              <defs><linearGradient id="tg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0B5C38"/><stop offset="1" stop-color="#007A49"/></linearGradient></defs>
+              <rect width="160" height="90" fill="url(#tg)"/>
+              <circle cx="132" cy="18" r="22" fill="#0E6B42"/>
+              <circle cx="24" cy="16" r="1.6" fill="#F4E7A4"/>
+              <circle cx="48" cy="28" r="1.2" fill="#fff"/>
+              <circle cx="150" cy="40" r="1.4" fill="#F4E7A4"/>
+              <rect x="46" y="38" width="14" height="38" rx="3" fill="#C9A227"/>
+              <rect x="64" y="30" width="16" height="46" rx="3" fill="#E8D36A"/>
+              <rect x="84" y="34" width="14" height="42" rx="3" fill="#F4E7A4"/>
+              <text x="12" y="22" fill="#fff" font-size="11" font-weight="700">0050</text>
+              <text x="12" y="78" fill="#F4E7A4" font-size="8" font-weight="600">買台啤抽元大</text>
+            </svg>
+          </div>
+          <div class="camp-main">
+            <div class="camp-title-row">
+              <h1 class="camp-title">買台啤抽元大 0050 等值現金</h1>
+              <span class="status">進行中</span>
+            </div>
+            <div class="camp-meta">
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
+                2026/08/19–2026/09/29
+              </span>
+              <span>資料同步 2026/08/27 13:33</span>
+            </div>
+          </div>
+          <div class="plus"><b>+374</b><em>會員</em></div>
+          <div class="actions">
+            <button class="btn" type="button">返回專案列表</button>
+            <button class="btn" type="button">編輯</button>
+            <button class="btn primary" type="button">下載 CSV</button>
+          </div>
+        </div>
+      </section>
+      <section class="card section" id="daily">
+        <div class="card-h">
+          <h2>每日成效<span class="sub">點選指標，圖表只顯示該數列</span></h2>
+          <div class="qual">
+            <span class="pill">合格手動 <b>316</b> 次</span>
+            <span class="pill">合格載具 <b>421</b> 次</span>
+          </div>
+        </div>
+        <div class="card-b">
+          <div class="kpi-row" id="kpiRow"></div>
+          <div class="toolbar">
+            <p class="hint">目前數列：<b id="seriesName">登錄罐數</b>　成效區間 2026/08/19–2026/08/27（截至同步）</p>
+            <div class="seg" role="group" aria-label="時間粒度">
+              <button type="button" class="on" data-grain="day">日</button>
+              <button type="button" data-grain="week">週</button>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="dailyChart"></canvas></div>
+          <div class="chart-foot">
+            <div>合計 <strong id="seriesSum">7,381</strong> <span id="seriesUnit">罐</span></div>
+            <div>活動期間至 2026/09/29 · <button class='btn' type='button'>下載圖表</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="consumer">
+        <div class="grid-3">
+          <article class="card">
+            <div class="card-b">
+              <div class="mini-h"><h3>性別分佈</h3><span class="total-chip">總數 <b>640</b> 人</span></div>
+              <div class="donut-box"><canvas id="genderChart"></canvas><ul class="legend" id="genderLegend"></ul></div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-b">
+              <div class="mini-h"><h3>年齡分佈</h3><span class="total-chip">總數 <b>640</b> 人</span></div>
+              <div class="bars" id="ageBars"></div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-b">
+              <div class="mini-h"><h3>地區分佈</h3><span class="total-chip">總數 <b>640</b> 人</span></div>
+              <div class="bars" id="regionBars"></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="card section" id="login">
+        <div class="card-h">
+          <h2>登錄<span class="sub">產品 · 通路 · 來源 · 時段　單一檢視</span></h2>
+          <div class="seg" role="tablist" id="loginSeg">
+            <button type="button" class="on" data-view="product">產品</button>
+            <button type="button" data-view="channel">通路</button>
+            <button type="button" data-view="source">來源</button>
+            <button type="button" data-view="hour">時段</button>
+          </div>
+        </div>
+        <div class="card-b">
+          <div class="toolbar"><p class="hint" id="loginHint">登錄罐數合計 <b>7,381</b> 罐 · 金牌 one 最高</p></div>
+          <div class="hbar" id="loginWrap"><canvas id="loginChart"></canvas></div>
+        </div>
+      </section>
+
+      <section class="card section" id="amount">
+        <div class="card-h">
+          <h2>登錄金額<span class="sub">消費金額與次數（人數統計）</span></h2>
+          <span class="axis-note">氣泡大小 = 人數 · 軸距互斥</span>
+        </div>
+        <div class="card-b">
+          <div class="bubble-wrap"><canvas id="bubbleChart"></canvas></div>
+          <div class="chart-foot">
+            <div>X 累積金額（元）　Y 累積次數　合計 <strong>374</strong> 人</div>
+            <div>懸停氣泡可看人數</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section" id="game">
+        <div class="card-h">
+          <h2>遊戲追蹤<span class="sub">點擊任一指標欄即可排序</span></h2>
+          <div class="table-tools">
+            <input class="search" id="gameSearch" type="search" placeholder="搜尋按鈕名稱" />
+          </div>
+        </div>
+        <div class="card-b" style="padding-top:0">
+          <table class="ga" id="gameTable">
+            <thead>
+              <tr>
+                <th>按鈕</th>
+                <th class="s active" data-key="clicks">點擊次數 <span class="caret">↓</span></th>
+                <th class="s" data-key="users">點擊總使用者 <span class="caret"></span></th>
+                <th class="s" data-key="avg">平均點擊 <span class="caret"></span></th>
+              </tr>
+            </thead>
+            <tbody id="gameBody"></tbody>
+          </table>
+        </div>
+      </section>
+      <p class="foot-note">TAIWAN BEER CRM · 專案成效分析示意頁 · 資料同步 2026/08/27 13:33（UTC+8）</p>
+    </main>
+  </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<script>
+
+const fmt = (n, d = 0) => Number(n).toLocaleString("zh-TW", { minimumFractionDigits: d, maximumFractionDigits: d });
+const DAYS = ["8/19","8/20","8/21","8/22","8/23","8/24","8/25","8/26","8/27"];
+const WEEKS = ["8/17–8/23","8/24–8/30"];
+const METRICS = {
+  friends: { name: "好友 / LINE 會員總數", unit: "人", total: 1240, daily: [50,62,74,99,124,347,186,161,137] },
+  binds:   { name: "載具綁定總數", unit: "人", total: 890,  daily: [36,45,53,71,89,249,134,116,97] },
+  visits:  { name: "造訪網站總人數（排除重複）", unit: "人", total: 640,  daily: [26,32,38,51,64,179,96,83,71] },
+  invoices:{ name: "發票登錄次數", unit: "次", total: 407,  daily: [16,20,24,33,41,114,61,53,45] },
+  cans:    { name: "登錄罐數", unit: "罐", total: 7381, daily: [295,369,443,590,738,2066,1107,959,814] }
+};
+const state = { metric: "cans", grain: "day", loginView: "product", sortKey: "clicks", sortDir: "desc", q: "" };
+let dailyChart, loginChart, bubbleChart;
+function weekOf(arr) {
+  return [arr.slice(0,5).reduce((a,b)=>a+b,0), arr.slice(5).reduce((a,b)=>a+b,0)];
+}
+function renderKpis() {
+  const row = document.getElementById("kpiRow");
+  row.innerHTML = Object.entries(METRICS).map(([key, m]) =>
+    "<button type=\"button\" class=\"kpi" + (key===state.metric?" on":"") + "\" data-metric=\"" + key + "\" aria-pressed=\"" + (key===state.metric) + "\">" +
+    "<div class=\"k\">" + m.name + "</div><div class=\"v\">" + fmt(m.total) + "</div><div class=\"u\">" + m.unit + "</div></button>"
+  ).join("");
+  row.querySelectorAll(".kpi").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.metric = btn.dataset.metric;
+      renderKpis();
+      updateDailyChart();
+    });
+  });
+}
+function updateDailyChart() {
+  const m = METRICS[state.metric];
+  const labels = state.grain === "day" ? DAYS : WEEKS;
+  const data = state.grain === "day" ? m.daily : weekOf(m.daily);
+  document.getElementById("seriesName").textContent = m.name;
+  document.getElementById("seriesSum").textContent = fmt(m.total);
+  document.getElementById("seriesUnit").textContent = m.unit;
+  const ctx = document.getElementById("dailyChart");
+  const cfg = {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: "#007A49",
+        backgroundColor: (c) => {
+          const g = c.chart.ctx, area = c.chart.chartArea;
+          if (!area) return "rgba(0,122,73,.15)";
+          const gr = g.createLinearGradient(0, area.top, 0, area.bottom);
+          gr.addColorStop(0, "rgba(0,122,73,.32)");
+          gr.addColorStop(1, "rgba(0,122,73,.02)");
+          return gr;
+        },
+        fill: true, tension: 0.35, borderWidth: 2.2,
+        pointRadius: 4, pointHoverRadius: 6,
+        pointBackgroundColor: "#fff", pointBorderColor: "#007A49",
+        pointBorderWidth: 2, pointHoverBackgroundColor: "#007A49"
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#1C1C1C",
+          titleFont: { family: "Noto Sans TC", size: 12 },
+          bodyFont: { family: "Noto Sans TC", size: 13, weight: "600" },
+          padding: 10,
+          callbacks: { label: (x) => " " + m.name + "  " + fmt(x.raw) + " " + m.unit }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { family: "Noto Sans TC", size: 11 }, color: "#6F6A64", autoSkip: false }, border: { color: "#E4DBD2" } },
+        y: {
+          beginAtZero: true, grace: "8%",
+          ticks: { font: { family: "Noto Sans TC", size: 11 }, color: "#6F6A64", callback: v => fmt(v) },
+          grid: { color: "rgba(228,219,210,.9)" }, border: { display: false },
+          title: { display: true, text: m.unit, color: "#6F6A64", font: { family: "Noto Sans TC", size: 11 } }
+        }
+      }
+    }
+  };
+  if (dailyChart) dailyChart.destroy();
+  dailyChart = new Chart(ctx, cfg);
+}
+
+const GENDER = [
+  { label: "男", pct: 30.5, n: 195, color: "#007A49" },
+  { label: "女", pct: 29.5, n: 189, color: "#5CB88A" },
+  { label: "未揭露", pct: 40.0, n: 256, color: "#E0B34E" }
+];
+const AGE = [
+  { label: "18–20", n: 38 }, { label: "21–30", n: 192 }, { label: "31–40", n: 205 },
+  { label: "41–50", n: 109 }, { label: "51–60", n: 51 }, { label: "61+", n: 19 }, { label: "未填寫", n: 26 }
+];
+const REGION = [
+  { label: "北部", n: 282 }, { label: "中部", n: 166 }, { label: "南部", n: 147 }, { label: "東部", n: 45 }
+];
+function renderBars(el, rows, total) {
+  const max = Math.max(...rows.map(r => r.n));
+  el.innerHTML = rows.map(r => {
+    const pct = (r.n / total * 100);
+    return "<div class=\"bar-row\"><div class=\"lab\">" + r.label + "</div>" +
+      "<div class=\"track\"><div class=\"fill\" style=\"width:" + (r.n/max*100).toFixed(1) + "%\"></div></div>" +
+      "<div class=\"num\"><b>" + fmt(r.n) + "</b><em>" + pct.toFixed(1) + "%</em></div></div>";
+  }).join("");
+}
+function renderGender() {
+  document.getElementById("genderLegend").innerHTML = GENDER.map(g =>
+    "<li><i class=\"dot\" style=\"background:" + g.color + "\"></i><span>" + g.label +
+    "</span><span class=\"pct\">" + g.pct.toFixed(1) + "%</span><span class=\"cnt\">" + fmt(g.n) + " 人</span></li>"
+  ).join("");
+  new Chart(document.getElementById("genderChart"), {
+    type: "doughnut",
+    data: {
+      labels: GENDER.map(g => g.label),
+      datasets: [{ data: GENDER.map(g => g.n), backgroundColor: GENDER.map(g => g.color), borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: {
+      responsive: false, cutout: "68%",
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: "#1C1C1C", callbacks: { label: (x) => " " + x.label + "  " + fmt(x.raw) + " 人（" + GENDER[x.dataIndex].pct.toFixed(1) + "%）" } }
+      }
+    },
+    plugins: [{
+      id: "hole",
+      afterDraw(chart) {
+        const meta = chart.getDatasetMeta(0);
+        if (!meta.data[0]) return;
+        const {x, y} = meta.data[0];
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#1C1C1C";
+        ctx.font = "700 20px Noto Sans TC";
+        ctx.fillText("640", x, y - 8);
+        ctx.fillStyle = "#6F6A64";
+        ctx.font = "500 11px Noto Sans TC";
+        ctx.fillText("總數", x, y + 12);
+        ctx.restore();
+      }
+    }]
+  });
+}
+const LOGIN = {
+  product: { hint: "登錄罐數合計 <b>7,381</b> 罐 · 金牌 one 最高", unit: "罐", labels: ["金牌 one","金牌","經典","18天","雲泡"], data: [2583,1845,1255,1033,665], hourly: false },
+  channel: { hint: "發票登錄合計 <b>407</b> 次", unit: "次", labels: ["7-11","全家","全聯","美廉社","其他"], data: [154,118,61,41,33], hourly: false },
+  source:  { hint: "流量來源合計 <b>407</b> 次", unit: "次", labels: ["LINE推播","IG","好友分享","FB","Rich Menu","Threads"], data: [122,89,73,57,41,25], hourly: false },
+  hour:    { hint: "各時段佔比 · 高峰 <b>19–21 時</b>", unit: "%", labels: Array.from({length:24}, (_,i) => String(i).padStart(2,"0")), data: [1.2,0.8,0.5,0.3,0.3,0.4,0.8,1.5,2.4,3.2,3.8,4.2,5.1,4.6,4.0,3.8,4.1,5.0,6.8,11.2,13.5,10.8,7.2,4.5], hourly: true }
+};
+const barLabelPlugin = {
+  id: "barLabel",
+  afterDatasetsDraw(chart) {
+    if (chart.config._hourly) return;
+    const {ctx} = chart;
+    const meta = chart.getDatasetMeta(0);
+    ctx.save();
+    ctx.fillStyle = "#6F6A64";
+    ctx.font = "600 11px Noto Sans TC";
+    ctx.textBaseline = "middle";
+    meta.data.forEach((bar, i) => {
+      const v = chart.data.datasets[0].data[i];
+      ctx.textAlign = "left";
+      ctx.fillText(fmt(v), bar.x + 8, bar.y);
+    });
+    ctx.restore();
+  }
+};
+function updateLoginChart() {
+  const v = LOGIN[state.loginView];
+  document.getElementById("loginHint").innerHTML = v.hint;
+  const wrap = document.getElementById("loginWrap");
+  wrap.classList.toggle("hours", v.hourly);
+  const horizontal = !v.hourly;
+  const colors = v.data.map((_, i) => {
+    if (v.hourly) return (i >= 19 && i <= 21) ? "#007A49" : "rgba(0,122,73,.35)";
+    return i === 0 ? "#007A49" : "rgba(0,122,73," + (0.85 - i * 0.12) + ")";
+  });
+  const cfg = {
+    type: "bar",
+    data: { labels: v.labels, datasets: [{ data: v.data, backgroundColor: colors, borderRadius: 4, borderSkipped: false, barPercentage: v.hourly ? 0.7 : 0.62, categoryPercentage: 0.78 }] },
+    options: {
+      indexAxis: horizontal ? "y" : "x",
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: "#1C1C1C", callbacks: { label: (x) => v.hourly ? " " + x.raw.toFixed(1) + "%" : " " + fmt(x.raw) + " " + v.unit } }
+      },
+      scales: {
+        x: {
+          beginAtZero: true, grace: horizontal ? "18%" : "8%",
+          grid: { color: horizontal ? "rgba(228,219,210,.9)" : "transparent", drawBorder: false },
+          ticks: { font: { family: "Noto Sans TC", size: 11 }, color: "#6F6A64", callback: (val) => (typeof val === "number" ? fmt(val) : val) },
+          border: { color: "#E4DBD2" }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: horizontal ? "transparent" : "rgba(228,219,210,.9)", drawBorder: false },
+          ticks: { font: { family: "Noto Sans TC", size: 12 }, color: "#1C1C1C" },
+          border: { display: false }
+        }
+      }
+    },
+    plugins: horizontal ? [barLabelPlugin] : []
+  };
+  cfg._hourly = v.hourly;
+  if (loginChart) loginChart.destroy();
+  loginChart = new Chart(document.getElementById("loginChart"), cfg);
+}
+
+const X_BINS = ["≤0","1–74","75–148","149–222","223–296","297–370","371–444","445–518","519–592","593–666","≥667"];
+const Y_BINS = ["1","2","3","4","5","6","7","≥8"];
+const BUBBLES = [
+  [0,0,6],[1,0,28],[2,0,41],[3,0,36],[4,0,29],[5,0,16],[6,0,8],[8,0,3],[10,0,18],
+  [1,1,8],[2,1,15],[3,1,21],[4,1,17],[5,1,11],[7,1,6],[10,1,16],
+  [3,2,7],[4,2,9],[5,2,8],[10,2,22],
+  [4,3,5],[6,3,4],[10,3,12],
+  [5,4,3],[10,4,7],
+  [7,5,2],[10,5,5],
+  [10,6,3],
+  [9,7,2],[10,7,6]
+];
+function renderBubble() {
+  const maxN = Math.max(...BUBBLES.map(b => b[2]));
+  const points = BUBBLES.map(([x,y,n]) => ({ x, y, r: 5 + Math.sqrt(n / maxN) * 22, n }));
+  bubbleChart = new Chart(document.getElementById("bubbleChart"), {
+    type: "bubble",
+    data: { datasets: [{ data: points, backgroundColor: "rgba(0,122,73,.28)", borderColor: "rgba(0,122,73,.85)", borderWidth: 1.4 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#1C1C1C",
+          titleFont: { family: "Noto Sans TC", size: 12 },
+          bodyFont: { family: "Noto Sans TC", size: 13 },
+          padding: 10,
+          callbacks: {
+            title: (items) => { const p = items[0].raw; return "金額 " + X_BINS[p.x] + " 元 · 次數 " + Y_BINS[p.y]; },
+            label: (item) => " 人數  " + fmt(item.raw.n) + " 人"
+          }
+        }
+      },
+      scales: {
+        x: {
+          min: -0.6, max: 10.6,
+          ticks: { stepSize: 1, callback: v => X_BINS[v] ?? "", font: { family: "Noto Sans TC", size: 10 }, color: "#6F6A64", maxRotation: 45, minRotation: 45 },
+          grid: { color: "rgba(228,219,210,.9)" },
+          title: { display: true, text: "受眾總消費累積金額（元）", font: { family: "Noto Sans TC", size: 12 }, color: "#6F6A64", padding: 8 },
+          border: { color: "#E4DBD2" }
+        },
+        y: {
+          min: -0.6, max: 7.6,
+          ticks: { stepSize: 1, callback: v => Y_BINS[v] ?? "", font: { family: "Noto Sans TC", size: 11 }, color: "#6F6A64" },
+          grid: { color: "rgba(228,219,210,.9)" },
+          title: { display: true, text: "受眾總消費累積次數", font: { family: "Noto Sans TC", size: 12 }, color: "#6F6A64" },
+          border: { display: false }
+        }
+      }
+    }
+  });
+}
+const GAME = [
+  { btn: "首頁_立即登錄發票", clicks: 1842, users: 512 },
+  { btn: "登錄頁_掃描發票", clicks: 1296, users: 407 },
+  { btn: "遊戲頁_開始抽獎", clicks: 1108, users: 356 },
+  { btn: "首頁_我的AI裝備", clicks: 876, users: 298 },
+  { btn: "登錄頁_手動輸入", clicks: 754, users: 289 },
+  { btn: "首頁_分享活動", clicks: 621, users: 241 },
+  { btn: "首頁_活動辦法", clicks: 498, users: 312 },
+  { btn: "我的頁_查看點數", clicks: 412, users: 198 },
+  { btn: "活動頁_元大0050說明", clicks: 287, users: 176 },
+  { btn: "我的頁_兌換紀錄", clicks: 164, users: 98 }
+].map(r => ({ ...r, avg: r.clicks / r.users }));
+function renderGame() {
+  const q = state.q.trim().toLowerCase();
+  let rows = GAME.filter(r => r.btn.toLowerCase().includes(q));
+  rows = [...rows].sort((a,b) => {
+    const d = a[state.sortKey] - b[state.sortKey];
+    return state.sortDir === "desc" ? -d : d;
+  });
+  const totC = GAME.reduce((s,r)=>s+r.clicks,0);
+  const totU = GAME.reduce((s,r)=>s+r.users,0);
+  const visC = rows.reduce((s,r)=>s+r.clicks,0);
+  const visU = rows.reduce((s,r)=>s+r.users,0);
+  const body = document.getElementById("gameBody");
+  const totalLabel = q ? "合計（篩選 " + rows.length + "）" : "合計";
+  const tC = q ? visC : totC;
+  const tU = q ? visU : totU;
+  const tA = tU ? tC / tU : 0;
+  body.innerHTML = "<tr class=\"totals\"><td>" + totalLabel + "</td><td class=\"metric\">" + fmt(tC) + "</td><td class=\"metric\">" + fmt(tU) + "</td><td class=\"metric\">" + fmt(tA, 2) + "</td></tr>" +
+    rows.map(r => "<tr><td class=\"dim\">" + r.btn + "</td>" +
+      "<td class=\"metric\">" + fmt(r.clicks) + "<span class=\"pct\">" + (r.clicks/totC*100).toFixed(2) + "%</span></td>" +
+      "<td class=\"metric\">" + fmt(r.users) + "<span class=\"pct\">" + (r.users/totU*100).toFixed(2) + "%</span></td>" +
+      "<td class=\"metric\">" + fmt(r.avg, 2) + "</td></tr>").join("");
+  document.querySelectorAll("#gameTable thead th.s").forEach(th => {
+    const on = th.dataset.key === state.sortKey;
+    th.classList.toggle("active", on);
+    th.querySelector(".caret").textContent = on ? (state.sortDir === "desc" ? "↓" : "↑") : "";
+  });
+}
+function bindNav() {
+  const chips = [...document.querySelectorAll(".chipbar .chip")];
+  chips.forEach(c => c.addEventListener("click", () => {
+    document.getElementById(c.dataset.jump).scrollIntoView({ behavior: "smooth", block: "start" });
+  }));
+  const io = new IntersectionObserver((ents) => {
+    ents.forEach(e => {
+      if (e.isIntersecting) chips.forEach(c => c.classList.toggle("on", c.dataset.jump === e.target.id));
+    });
+  }, { rootMargin: "-20% 0px -60% 0px", threshold: 0.1 });
+  ["daily","consumer","login","amount","game"].forEach(id => io.observe(document.getElementById(id)));
+}
+document.querySelectorAll("[data-grain]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.grain = btn.dataset.grain;
+    document.querySelectorAll("[data-grain]").forEach(b => b.classList.toggle("on", b === btn));
+    updateDailyChart();
+  });
+});
+document.querySelectorAll("#loginSeg [data-view]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.loginView = btn.dataset.view;
+    document.querySelectorAll("#loginSeg [data-view]").forEach(b => b.classList.toggle("on", b === btn));
+    updateLoginChart();
+  });
+});
+document.querySelectorAll("#gameTable thead th.s").forEach(th => {
+  th.addEventListener("click", () => {
+    if (state.sortKey === th.dataset.key) state.sortDir = state.sortDir === "desc" ? "asc" : "desc";
+    else { state.sortKey = th.dataset.key; state.sortDir = "desc"; }
+    renderGame();
+  });
+});
+document.getElementById("gameSearch").addEventListener("input", (e) => { state.q = e.target.value; renderGame(); });
+renderKpis();
+updateDailyChart();
+renderGender();
+renderBars(document.getElementById("ageBars"), AGE, 640);
+renderBars(document.getElementById("regionBars"), REGION, 640);
+updateLoginChart();
+renderBubble();
+renderGame();
+bindNav();
+if (location.hash) {
+  const el = document.querySelector(location.hash);
+  if (el) el.scrollIntoView();
+}
+
+</script>
+</body>
+</html>
