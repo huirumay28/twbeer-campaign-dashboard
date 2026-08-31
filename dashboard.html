@@ -270,35 +270,7 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 .chart-link { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
 .chart-link:hover { border-color: var(--green-mid); box-shadow: 0 6px 18px rgba(0,122,73,.12); }
 .go { color: var(--green); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
-.profile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
-.profile-col { min-width: 0; padding: 4px 28px; }
-.profile-col:first-child { padding-left: 8px; }
-.profile-col:last-child { padding-right: 8px; }
-.profile-col + .profile-col { border-left: 1px solid var(--line); }
-.profile-col h3 { font-size: 13px; font-weight: 700; margin-bottom: 16px; }
-.profile-col .donut-box { flex-direction: column; align-items: center; gap: 16px; min-height: 0; }
-.profile-col .donut-box canvas { width: 112px !important; height: 112px !important; }
-.profile-col .legend { width: 100%; max-width: 240px; gap: 8px; }
-.profile-col .legend li {
-  grid-template-columns: 8px 1fr auto auto;
-  gap: 8px;
-  font-size: 12px;
-  align-items: baseline;
-}
-.profile-col .legend .cnt { grid-column: auto; margin-top: 0; font-size: 11px; }
-.profile-col .legend .pct { font-size: 12px; }
-.profile-col .bars { min-height: 0; gap: 14px; }
-.profile-col .bar-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas: "lab num" "track track";
-  gap: 4px 10px;
-  align-items: baseline;
-}
-.profile-col .bar-row .lab { grid-area: lab; font-size: 12px; color: var(--text); font-weight: 500; }
-.profile-col .bar-row .num { grid-area: num; font-size: 11px; }
-.profile-col .bar-row .num em { margin-left: 6px; }
-.profile-col .bar-row .track { grid-area: track; height: 6px; }
+
 .back { display: inline-flex; align-items: center; gap: 6px; margin-left: 16px; font-size: 12px; font-weight: 600; color: var(--green); }
 .back:hover { text-decoration: underline; }
 .crumbs-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px 0; font-size: 12px; color: var(--muted); gap: 8px; flex-wrap: wrap; }
@@ -392,37 +364,39 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
         </div>
       </section>
 
-      <section class="card" id="profile">
-        <div class="card-h">
-          <h2>會員輪廓<span class="sub">總數 22,203 人</span></h2>
-          <div class="head-right">
-            <div class="dd">
-              <button type="button" class="btn dd-toggle" aria-haspopup="true">下載</button>
-              <div class="dd-menu">
-                <button type="button" data-dl="csv">下載 CSV</button>
-                <button type="button" data-dl="chart">下載圖表</button>
-              </div>
+      <section class="section" id="profile">
+        <div class="sec-head">
+          <h2>會員輪廓</h2>
+          <div class="dd">
+            <button type="button" class="btn dd-toggle" aria-haspopup="true">下載</button>
+            <div class="dd-menu">
+              <button type="button" data-dl="csv">下載 CSV</button>
+              <button type="button" data-dl="chart">下載圖表</button>
             </div>
           </div>
         </div>
-        <div class="card-b">
-          <div class="profile-grid">
-            <div class="profile-col">
-              <h3>男女比例</h3>
+        <div class="grid-3">
+          <article class="card">
+            <div class="card-b">
+              <div class="mini-h"><h3>男女比例</h3><span class="total-chip">總數 <b>22,203</b> 人</span></div>
               <div class="donut-box">
-                <canvas id="genderChart" width="112" height="112"></canvas>
+                <canvas id="genderChart" width="148" height="148"></canvas>
                 <ul class="legend" id="genderLegend"></ul>
               </div>
             </div>
-            <div class="profile-col">
-              <h3>年齡分佈</h3>
+          </article>
+          <article class="card">
+            <div class="card-b">
+              <div class="mini-h"><h3>年齡分佈</h3><span class="total-chip">總數 <b>22,203</b> 人</span></div>
               <div class="bars" id="ageBars"></div>
             </div>
-            <div class="profile-col">
-              <h3>如何進入台啤LINE</h3>
+          </article>
+          <article class="card">
+            <div class="card-b">
+              <div class="mini-h"><h3>如何進入台啤LINE</h3><span class="total-chip">總數 <b>22,203</b> 人</span></div>
               <div class="bars" id="sourceBars"></div>
             </div>
-          </div>
+          </article>
         </div>
       </section>
 
@@ -533,11 +507,11 @@ function renderGender() {
         c.textAlign = "center";
         c.textBaseline = "middle";
         c.fillStyle = "#1C1C1C";
-        c.font = "700 15px Noto Sans TC";
-        c.fillText("22,203", pt.x, pt.y - 7);
+        c.font = "700 18px Noto Sans TC";
+        c.fillText("22,203", pt.x, pt.y - 8);
         c.fillStyle = "#6F6A64";
-        c.font = "500 10px Noto Sans TC";
-        c.fillText("總數", pt.x, pt.y + 10);
+        c.font = "500 11px Noto Sans TC";
+        c.fillText("總數", pt.x, pt.y + 12);
         c.restore();
       }
     }]
@@ -697,7 +671,7 @@ growthCard.addEventListener("keydown", (e) => {
 });
 
 renderBars(document.getElementById("ageBars"), AGE, false);
-renderBars(document.getElementById("sourceBars"), SOURCE, false);
+renderBars(document.getElementById("sourceBars"), SOURCE, true);
 renderGender();
 renderMonthChart();
 bindDownloads();
