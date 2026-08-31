@@ -6,6 +6,8 @@ This is a **UI proposal**, not the live admin. It redesigns the current 買台�
 
 Live preview: https://huirumay28.github.io/twbeer-campaign-dashboard/
 
+Campaign list is `projects.html` (專案成效分析總表). Three cases: 買台啤抽元大 0050 → `index.html`, 真假傑憲大挑戰 → `jiexian.html`, 喝台啤抽東京雙人來回機票 → `tokyo.html`.
+
 ## What’s on the page
 
 1. **每日成效** — click a KPI card; the chart shows only that series, with the right unit (人 / 次 / 罐). Toggle 日 / 週.
