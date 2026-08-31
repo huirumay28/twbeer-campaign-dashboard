@@ -59,8 +59,10 @@ a { color: inherit; text-decoration: none; }
 .user { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
 .icon-btn { width: 32px; height: 32px; border: 0; background: transparent; color: var(--muted); border-radius: 8px; display: grid; place-items: center; }
 .icon-btn:hover { background: var(--green-soft); color: var(--green); }
-.crumbs { padding: 16px 24px 0; font-size: 12px; color: var(--muted); }
+.crumbs { padding: 16px 24px 0; font-size: 12px; color: var(--muted); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .crumbs b { color: var(--text); font-weight: 500; }
+.updated { font-size: 12px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+.updated time { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
 .chipbar { position: sticky; top: var(--topbar); z-index: 20; background: rgba(241,232,225,.92); backdrop-filter: blur(10px); padding: 12px 24px 8px; display: flex; gap: 8px; }
 .chip { height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: #fff; font-size: 13px; font-weight: 500; color: var(--muted); }
 .chip:hover { border-color: var(--green); color: var(--green); }
@@ -268,9 +270,15 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 .chart-link { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
 .chart-link:hover { border-color: var(--green-mid); box-shadow: 0 6px 18px rgba(0,122,73,.12); }
 .go { color: var(--green); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
-.profile-view[hidden] { display: none !important; }
-.donut-box { min-height: 200px; }
-.bars { min-height: 200px; justify-content: center; }
+.profile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.profile-col { min-width: 0; }
+.profile-col h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+.profile-col .bar-row { grid-template-columns: 84px 1fr 70px; gap: 6px; }
+.profile-col .bar-row .num em { display: block; margin-left: 0; }
+.donut-box { min-height: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.donut-box canvas { width: 148px; height: 148px; }
+.legend { width: 100%; }
+.bars { min-height: 0; justify-content: flex-start; }
 .back { display: inline-flex; align-items: center; gap: 6px; margin-left: 16px; font-size: 12px; font-weight: 600; color: var(--green); }
 .back:hover { text-decoration: underline; }
 .crumbs-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px 0; font-size: 12px; color: var(--muted); gap: 8px; flex-wrap: wrap; }
@@ -333,7 +341,10 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
         </button>
       </div>
     </header>
-    <div class="crumbs">首頁 / <b>儀表板</b></div>
+    <div class="crumbs">
+      <span>首頁 / <b>儀表板</b></span>
+      <span class="updated">Last updated <time datetime="2026-08-27T13:33:00+08:00">2026/08/27 13:33</time></span>
+    </div>
     <main class="page">
       <section class="kpi-row four" aria-label="關鍵指標">
         <div class="kpi">
@@ -363,14 +374,8 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 
       <section class="card" id="profile">
         <div class="card-h">
-          <h2>會員輪廓<span class="sub">單一檢視</span></h2>
+          <h2>會員輪廓<span class="sub">總數 22,203 人</span></h2>
           <div class="head-right">
-            <span class="total-chip">總數 <b>22,203</b> 人</span>
-            <div class="seg" role="tablist" aria-label="會員輪廓檢視" id="profileTabs">
-              <button type="button" class="on" data-tab="gender" role="tab" aria-selected="true">男女比例</button>
-              <button type="button" data-tab="age" role="tab" aria-selected="false">年齡分佈</button>
-              <button type="button" data-tab="source" role="tab" aria-selected="false">如何進入台啤LINE</button>
-            </div>
             <div class="dd">
               <button type="button" class="btn dd-toggle" aria-haspopup="true">下載</button>
               <div class="dd-menu">
@@ -381,17 +386,22 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
           </div>
         </div>
         <div class="card-b">
-          <div class="profile-view" id="view-gender">
-            <div class="donut-box">
-              <canvas id="genderChart" width="176" height="176"></canvas>
-              <ul class="legend" id="genderLegend"></ul>
+          <div class="profile-grid">
+            <div class="profile-col">
+              <h3>男女比例</h3>
+              <div class="donut-box">
+                <canvas id="genderChart" width="148" height="148"></canvas>
+                <ul class="legend" id="genderLegend"></ul>
+              </div>
             </div>
-          </div>
-          <div class="profile-view" id="view-age" hidden>
-            <div class="bars" id="ageBars"></div>
-          </div>
-          <div class="profile-view" id="view-source" hidden>
-            <div class="bars" id="sourceBars"></div>
+            <div class="profile-col">
+              <h3>年齡分佈</h3>
+              <div class="bars" id="ageBars"></div>
+            </div>
+            <div class="profile-col">
+              <h3>如何進入台啤LINE</h3>
+              <div class="bars" id="sourceBars"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -454,7 +464,6 @@ const AUG_LABELS = AUG_MEMBERS.map((_, i) => {
   const d = new Date(2026, 7, i + 1);
   return (d.getMonth() + 1) + "/" + d.getDate() + " (" + WD[d.getDay()] + ")";
 });
-let state = { tab: "gender" };
 let genderChart, monthChart;
 
 function renderBars(el, rows, wide) {
@@ -504,7 +513,7 @@ function renderGender() {
         c.textAlign = "center";
         c.textBaseline = "middle";
         c.fillStyle = "#1C1C1C";
-        c.font = "700 22px Noto Sans TC";
+        c.font = "700 18px Noto Sans TC";
         c.fillText("22,203", pt.x, pt.y - 8);
         c.fillStyle = "#6F6A64";
         c.font = "500 11px Noto Sans TC";
@@ -569,18 +578,6 @@ function renderMonthChart() {
   });
 }
 
-function showTab(tab) {
-  state.tab = tab;
-  document.querySelectorAll("#profileTabs [data-tab]").forEach(b => {
-    const on = b.dataset.tab === tab;
-    b.classList.toggle("on", on);
-    b.setAttribute("aria-selected", on);
-  });
-  document.getElementById("view-gender").hidden = tab !== "gender";
-  document.getElementById("view-age").hidden = tab !== "age";
-  document.getElementById("view-source").hidden = tab !== "source";
-}
-
 function downloadBlob(name, mime, text) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob(["\uFEFF" + text], { type: mime }));
@@ -592,9 +589,17 @@ function rowsCsv(rows) {
   return "項目,人數,占比\n" + rows.map(r => r.label + "," + r.n + "," + (r.n / TOTAL * 100).toFixed(1) + "%").join("\n") + "\n總數," + TOTAL + ",100.0%\n";
 }
 function downloadProfileCsv() {
-  if (state.tab === "gender") downloadBlob("會員輪廓-男女比例.csv", "text/csv;charset=utf-8", rowsCsv(GENDER));
-  else if (state.tab === "age") downloadBlob("會員輪廓-年齡分佈.csv", "text/csv;charset=utf-8", rowsCsv(AGE));
-  else downloadBlob("會員輪廓-如何進入台啤LINE.csv", "text/csv;charset=utf-8", rowsCsv(SOURCE));
+  const parts = [
+    "【男女比例】",
+    rowsCsv(GENDER).rstrip(),
+    "",
+    "【年齡分佈】",
+    rowsCsv(AGE).rstrip(),
+    "",
+    "【如何進入台啤LINE】",
+    rowsCsv(SOURCE).rstrip()
+  ];
+  downloadBlob("會員輪廓.csv", "text/csv;charset=utf-8", parts.join("\n"));
 }
 function downloadCanvas(canvas, name) {
   if (!canvas) return;
@@ -641,9 +646,11 @@ function bindDownloads() {
         const section = dd.closest("section");
         if (section && section.id === "profile") {
           if (btn.dataset.dl === "csv") downloadProfileCsv();
-          else if (state.tab === "gender") downloadCanvas(document.getElementById("genderChart"), "會員輪廓-男女比例.png");
-          else if (state.tab === "age") downloadBarsPng(AGE, "會員輪廓-年齡分佈.png");
-          else downloadBarsPng(SOURCE, "會員輪廓-如何進入台啤LINE.png");
+          else {
+            downloadCanvas(document.getElementById("genderChart"), "會員輪廓-男女比例.png");
+            downloadBarsPng(AGE, "會員輪廓-年齡分佈.png");
+            downloadBarsPng(SOURCE, "會員輪廓-如何進入台啤LINE.png");
+          }
         } else if (section && section.id === "monthGrowth") {
           if (btn.dataset.dl === "csv") {
             const lines = ["日期,新增會員"];
@@ -669,12 +676,8 @@ growthCard.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goGrowth(); }
 });
 
-document.querySelectorAll("#profileTabs [data-tab]").forEach(btn => {
-  btn.addEventListener("click", () => showTab(btn.dataset.tab));
-});
-
 renderBars(document.getElementById("ageBars"), AGE, false);
-renderBars(document.getElementById("sourceBars"), SOURCE, true);
+renderBars(document.getElementById("sourceBars"), SOURCE, false);
 renderGender();
 renderMonthChart();
 bindDownloads();

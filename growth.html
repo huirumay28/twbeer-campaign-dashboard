@@ -61,6 +61,8 @@ a { color: inherit; text-decoration: none; }
 .icon-btn:hover { background: var(--green-soft); color: var(--green); }
 .crumbs { padding: 16px 24px 0; font-size: 12px; color: var(--muted); }
 .crumbs b { color: var(--text); font-weight: 500; }
+.updated { font-size: 12px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+.updated time { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
 .chipbar { position: sticky; top: var(--topbar); z-index: 20; background: rgba(241,232,225,.92); backdrop-filter: blur(10px); padding: 12px 24px 8px; display: flex; gap: 8px; }
 .chip { height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: #fff; font-size: 13px; font-weight: 500; color: var(--muted); }
 .chip:hover { border-color: var(--green); color: var(--green); }
@@ -335,6 +337,7 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
     </header>
     <div class="crumbs-row">
       <span><a href="dashboard.html">首頁</a> / <a href="dashboard.html">儀表板</a> / <b>會員成長曲線</b></span>
+      <span class="updated">Last updated <time datetime="2026-08-27T13:33:00+08:00">2026/08/27 13:33</time></span>
       <a class="back" href="dashboard.html">← 返回儀表板</a>
     </div>
     <main class="page">
