@@ -231,10 +231,16 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 @media (max-width: 1100px) { .game-split { grid-template-columns: 1fr; } }
 
 
-.range-box { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
-.range-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
-.range-label { font-size: 13px; color: var(--muted); }
-.range-label b { color: var(--text); font-weight: 600; }
+.range-box { margin-top: 4px; }
+.range-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.date-fields { display: flex; align-items: flex-end; gap: 10px; }
+.date-fields label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 600; color: var(--muted); }
+.date-fields input[type=date] {
+  height: 36px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 8px;
+  font-family: inherit; font-size: 13px; color: var(--text); background: #fff; min-width: 160px;
+}
+.date-fields input[type=date]:focus { outline: none; border-color: var(--green); }
+.date-tilde { font-size: 13px; color: var(--muted); padding-bottom: 8px; }
 .presets { display: flex; gap: 6px; flex-wrap: wrap; }
 .preset { height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line-strong); background: #fff; font-size: 12px; font-weight: 600; color: var(--muted); }
 .preset:hover { border-color: var(--green); color: var(--green); }
@@ -373,7 +379,27 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
                 </div>
               </div>
             </div>
-            <p class="hint">目前數列：<b id="seriesName">綁定會員數</b>　檢視 <b id="rangeHint">7/31–8/27</b></p>
+            <p class="hint">目前數列：<b id="seriesName">綁定會員數</b>　檢視 <b id="rangeHint">8/1–8/31</b></p>
+          </div>
+          <div class="range-box">
+            <div class="range-head">
+              <div class="date-fields">
+                <label>起始日
+                  <input type="date" id="dateFrom" min="2025-09-01" max="2026-08-31" value="2026-08-01" aria-label="起始日">
+                </label>
+                <span class="date-tilde">至</span>
+                <label>結束日
+                  <input type="date" id="dateTo" min="2025-09-01" max="2026-08-31" value="2026-08-31" aria-label="結束日">
+                </label>
+              </div>
+              <div class="presets" id="presets">
+                <button type="button" class="preset" data-preset="7">近7日</button>
+                <button type="button" class="preset" data-preset="30">近30日</button>
+                <button type="button" class="preset on" data-preset="month">本月</button>
+                <button type="button" class="preset" data-preset="year">今年</button>
+                <button type="button" class="preset" data-preset="all">全部</button>
+              </div>
+            </div>
           </div>
           <div class="hero">
             <div class="big" id="heroNum">0<em>人</em></div>
@@ -385,23 +411,6 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
               <div class="d" id="calloutDate"></div>
               <div class="n" id="calloutVal"></div>
             </div>
-          </div>
-          <div class="range-box">
-            <div class="range-head">
-              <div class="range-label">日期切片　<b id="rangeFrom">7/31</b> – <b id="rangeTo">8/27</b></div>
-              <div class="presets" id="presets">
-                <button type="button" class="preset" data-preset="7">近7日</button>
-                <button type="button" class="preset on" data-preset="28">近28日</button>
-                <button type="button" class="preset" data-preset="month">本月</button>
-                <button type="button" class="preset" data-preset="all">活動全程</button>
-              </div>
-            </div>
-            <div class="slider" id="slider">
-              <div class="slider-track"><div class="slider-fill" id="sliderFill"></div></div>
-              <input type="range" id="rangeStart" min="0" max="122" value="91" aria-label="起始日">
-              <input type="range" id="rangeEnd" min="0" max="122" value="118" aria-label="結束日">
-            </div>
-            <div class="range-ends"><span>2026/05/01</span><span>2026/08/31</span></div>
           </div>
           <div class="chart-foot">
             <div>點擊資料點可看當日明細　合計 <strong id="seriesSum">0</strong> 人</div>
@@ -421,13 +430,34 @@ function eachDay(from, to) {
   for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) out.push(new Date(d));
   return out;
 }
-const WIN_START = new Date(2026, 4, 1);
+const WIN_START = new Date(2025, 8, 1);
 const WIN_END = new Date(2026, 7, 31);
 const DATES = eachDay(WIN_START, WIN_END);
 const N = DATES.length;
 function md(d) { return (d.getMonth() + 1) + "/" + d.getDate() + " (" + WD[d.getDay()] + ")"; }
 function ymd(d) {
   return d.getFullYear() + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + String(d.getDate()).padStart(2, "0");
+}
+function iso(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function parseIso(s) {
+  const p = (s || "").split("-").map(Number);
+  if (p.length !== 3 || !p[0]) return null;
+  return new Date(p[0], p[1] - 1, p[2]);
+}
+function idxOf(d) {
+  const t = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  return Math.max(0, Math.min(N - 1, Math.round((t - DATES[0].getTime()) / 86400000)));
+}
+function synth(n, base, amp, salt) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const wave = 1 + 0.22 * Math.sin(i / 21 + salt);
+    const noise = ((Math.sin(i * 12.9898 + salt * 7.3) * 43758.5453) % 1 + 1) % 1;
+    out.push(Math.max(8, Math.round(base * wave + (noise - 0.5) * amp)));
+  }
+  return out;
 }
 const MAY_BINDS = [44,48,49,38,38,35,33,30,27,24,19,20,24,27,30,36,39,37,36,39,39,41,49,48,35,32,29,27,25,26,28];
 const JUN_BINDS = [42,40,36,32,28,37,32,23,27,27,31,35,42,50,44,45,46,47,49,51,51,38,35,34,33,26,30,29,27,31];
@@ -437,15 +467,15 @@ const MAY_FRIENDS = [55,63,64,50,48,43,39,39,47,39,34,38,38,43,45,55,57,51,55,56
 const JUN_FRIENDS = [56,50,48,47,45,46,48,42,42,44,46,48,64,68,61,59,63,64,58,69,64,49,51,46,45,39,48,48,43,44];
 const JUL_FRIENDS = [43,44,44,51,52,47,50,52,56,59,70,70,63,60,58,62,57,64,59,51,47,44,43,44,51,50,49,50,51,53,58];
 const AUG_FRIENDS = [20,24,17,21,22,21,26,18,23,19,18,22,21,28,19,25,18,22,50,62,74,99,124,347,186,161,137,48,38,42,32];
+const PRE_N = eachDay(WIN_START, new Date(2026, 3, 30)).length;
 const METRICS = {
-  friends: { name: "好友數", daily: MAY_FRIENDS.concat(JUN_FRIENDS, JUL_FRIENDS, AUG_FRIENDS) },
-  binds: { name: "綁定會員數", daily: MAY_BINDS.concat(JUN_BINDS, JUL_BINDS, AUG_BINDS) }
+  friends: { name: "好友數", daily: synth(PRE_N, 48, 18, 1.7).concat(MAY_FRIENDS, JUN_FRIENDS, JUL_FRIENDS, AUG_FRIENDS) },
+  binds: { name: "綁定會員數", daily: synth(PRE_N, 34, 14, 2.4).concat(MAY_BINDS, JUN_BINDS, JUL_BINDS, AUG_BINDS) }
 };
-const IDX_JUL31 = 91;
-const IDX_AUG1 = 92;
-const IDX_AUG27 = 118;
-const IDX_AUG31 = 122;
-const state = { metric: "binds", grain: "day", start: IDX_JUL31, end: IDX_AUG27, picked: null };
+const TODAY = new Date(2026, 7, 27);
+const IDX_AUG1 = idxOf(new Date(2026, 7, 1));
+const IDX_AUG31 = N - 1;
+const state = { metric: "binds", grain: "day", start: IDX_AUG1, end: IDX_AUG31, picked: null, preset: "month" };
 let chart;
 
 function sliceOf(arr) { return arr.slice(state.start, state.end + 1); }
@@ -485,44 +515,33 @@ function buckets() {
 }
 
 function rangeText() { return md(DATES[state.start]) + "–" + md(DATES[state.end]); }
-function syncSliderUI() {
-  const a = document.getElementById("rangeStart");
-  const b = document.getElementById("rangeEnd");
-  a.max = b.max = String(N - 1);
-  a.value = state.start;
-  b.value = state.end;
-  const left = state.start / (N - 1) * 100;
-  const right = state.end / (N - 1) * 100;
-  const fill = document.getElementById("sliderFill");
-  fill.style.left = left + "%";
-  fill.style.width = (right - left) + "%";
-  document.getElementById("rangeFrom").textContent = md(DATES[state.start]);
-  document.getElementById("rangeTo").textContent = md(DATES[state.end]);
+function syncDateUI() {
+  const a = document.getElementById("dateFrom");
+  const b = document.getElementById("dateTo");
+  a.value = iso(DATES[state.start]);
+  b.value = iso(DATES[state.end]);
   document.getElementById("rangeHint").textContent = rangeText();
-  const span = state.end - state.start + 1;
-  const isMonth = state.start === IDX_AUG1 && state.end === IDX_AUG31;
   document.querySelectorAll("#presets .preset").forEach(p => {
-    const key = p.dataset.preset;
-    p.classList.toggle("on",
-      (key === "all" && span === N) ||
-      (key === "7" && span === 7 && state.end === IDX_AUG27) ||
-      (key === "28" && span === 28 && state.end === IDX_AUG27) ||
-      (key === "month" && isMonth)
-    );
+    p.classList.toggle("on", p.dataset.preset === state.preset);
   });
 }
-function applyPreset(kind) {
-  if (kind === "all") { state.start = 0; state.end = N - 1; }
-  else if (kind === "month") { state.start = IDX_AUG1; state.end = IDX_AUG31; }
-  else {
-    const w = kind === "7" ? 7 : 28;
-    state.end = IDX_AUG27;
-    state.start = Math.max(0, state.end - w + 1);
-  }
+function applyRange(start, end, preset) {
+  if (start > end) { const t = start; start = end; end = t; }
+  state.start = start;
+  state.end = end;
+  state.preset = preset || "custom";
   state.picked = null;
   hideCallout();
-  syncSliderUI();
+  syncDateUI();
   updateChart();
+}
+function applyPreset(kind) {
+  const end = idxOf(TODAY);
+  if (kind === "all") applyRange(0, N - 1, "all");
+  else if (kind === "month") applyRange(IDX_AUG1, IDX_AUG31, "month");
+  else if (kind === "year") applyRange(idxOf(new Date(2026, 0, 1)), N - 1, "year");
+  else if (kind === "7") applyRange(Math.max(0, end - 6), end, "7");
+  else if (kind === "30") applyRange(Math.max(0, end - 29), end, "30");
 }
 
 const calloutPlugin = {
@@ -577,7 +596,7 @@ function updateChart() {
   document.getElementById("seriesSum").textContent = fmt(sum);
   document.getElementById("heroNum").innerHTML = fmt(sum) + "<em>人</em>";
   document.getElementById("heroMeta").textContent = m.name + " · 區間新增合計 · " + rangeText();
-  syncSliderUI();
+  syncDateUI();
   if (state.picked != null && state.picked >= b.values.length) state.picked = null;
   const ctx = document.getElementById("growthChart");
   const n = b.values.length;
@@ -653,20 +672,16 @@ function updateChart() {
   else hideCallout();
 }
 
-function bindSlider() {
-  const a = document.getElementById("rangeStart");
-  const b = document.getElementById("rangeEnd");
-  const onInput = (which) => {
-    let s = +a.value, e = +b.value;
-    if (s > e) { if (which === "start") e = s; else s = e; }
-    state.start = s; state.end = e;
-    state.picked = null;
-    hideCallout();
-    syncSliderUI();
-    updateChart();
+function bindDates() {
+  const a = document.getElementById("dateFrom");
+  const b = document.getElementById("dateTo");
+  const onChange = () => {
+    const from = parseIso(a.value) || DATES[state.start];
+    const to = parseIso(b.value) || DATES[state.end];
+    applyRange(idxOf(from), idxOf(to), "custom");
   };
-  a.addEventListener("input", () => onInput("start"));
-  b.addEventListener("input", () => onInput("end"));
+  a.addEventListener("change", onChange);
+  b.addEventListener("change", onChange);
   document.querySelectorAll("#presets .preset").forEach(p => {
     p.addEventListener("click", () => applyPreset(p.dataset.preset));
   });
@@ -731,7 +746,7 @@ document.querySelectorAll("[data-grain]").forEach(btn => {
   });
 });
 
-bindSlider();
+bindDates();
 bindDownloads();
 updateChart();
 
