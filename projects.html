@@ -62,76 +62,58 @@ a { color: inherit; text-decoration: none; }
 .crumbs b { color: var(--text); font-weight: 500; }
 .updated { font-size: 12px; color: var(--muted); font-weight: 500; white-space: nowrap; }
 .updated time { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
-.page { padding: 16px 24px 48px; display: flex; flex-direction: column; gap: 16px; }
-.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid rgba(228,219,210,.6); }
-.btn { height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line-strong); background: #fff; font-size: 13px; font-weight: 500; color: var(--text); display: inline-flex; align-items: center; gap: 6px; }
+.page { padding: 16px 24px 48px; display: flex; flex-direction: column; gap: 20px; }
+.btn { height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line-strong); background: #fff; font-size: 13px; font-weight: 500; color: var(--text); display: inline-flex; align-items: center; justify-content: center; gap: 6px; line-height: 1; }
 .btn:hover { border-color: var(--green); color: var(--green); }
 .btn.primary { background: var(--green); border-color: var(--green); color: #fff; }
 .btn.primary:hover { background: var(--green-deep); color: #fff; }
-.btn:focus-visible, .chip:focus-visible, .search:focus-visible, .proj:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.btn:focus-visible, .tile:focus-visible, .icon-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 .page-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .page-head h1 { font-size: 20px; font-weight: 700; }
 .actions { display: flex; gap: 8px; }
-.stat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.stat { background: #fff; border: 1px solid rgba(228,219,210,.6); border-radius: 8px; box-shadow: var(--shadow); padding: 14px 18px; }
-.stat .k { font-size: 12px; color: var(--muted); font-weight: 500; }
-.stat .v { margin-top: 6px; font-size: 24px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
-.stat.live .v { color: var(--green); }
-.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-.chips { display: flex; gap: 8px; flex-wrap: wrap; }
-.chip { height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: #fff; font-size: 13px; font-weight: 500; color: var(--muted); }
-.chip:hover { border-color: var(--green); color: var(--green); }
-.chip.on { background: var(--green); border-color: var(--green); color: #fff; }
-.search { height: 36px; width: 260px; padding: 0 12px 0 32px; border: 1px solid var(--line-strong); border-radius: 8px; font-family: inherit; font-size: 13px; color: var(--text); background: #fff url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27 fill=%27none%27 stroke=%27%239A948C%27 stroke-width=%271.6%27 viewBox=%270 0 24 24%27%3E%3Ccircle cx=%2711%27 cy=%2711%27 r=%277%27/%3E%3Cpath d=%27M20 20l-3-3%27/%3E%3C/svg%3E") 10px 50% no-repeat; }
-.search:focus { outline: none; border-color: var(--green); }
-.list { display: flex; flex-direction: column; gap: 12px; }
-.proj {
-  display: flex; align-items: center; gap: 20px; padding: 18px 20px;
-  background: #fff; border-radius: var(--radius); box-shadow: var(--shadow);
-  border: 1px solid rgba(228,219,210,.6); transition: border-color .15s, box-shadow .15s;
+.stat-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.stat {
+  background: #fff; border: 1px solid rgba(228,219,210,.6); border-radius: 8px;
+  box-shadow: var(--shadow); padding: 22px 24px 26px;
 }
-.proj:hover { border-color: var(--green-mid); box-shadow: 0 6px 18px rgba(0,122,73,.08); }
-.proj[hidden] { display: none; }
-.proj-kv {
-  width: 104px; height: 148px; flex-shrink: 0; border-radius: 8px; overflow: hidden;
-  background: #04150d; box-shadow: var(--shadow);
+.stat .k { font-size: 13px; color: var(--muted); font-weight: 500; }
+.stat .v {
+  margin-top: 16px; font-size: 40px; font-weight: 700; color: var(--green);
+  letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1;
 }
-.proj-kv img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; }
-.poster {
-  width: 100%; height: 100%;
-  display: flex; flex-direction: column; justify-content: flex-end;
-  padding: 12px 10px 11px; color: #fff;
-  background:
-    radial-gradient(120% 70% at 10% 0%, rgba(224,179,78,.32), transparent 55%),
-    linear-gradient(165deg, #0E4A32 0%, #04150d 72%);
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.tile {
+  display: flex; flex-direction: column; background: #fff; border-radius: var(--radius);
+  box-shadow: var(--shadow); border: 1px solid rgba(228,219,210,.6); overflow: hidden;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
 }
-.poster.tokyo {
-  background:
-    radial-gradient(110% 80% at 90% 10%, rgba(224,179,78,.26), transparent 50%),
-    linear-gradient(200deg, #12563B 0%, #062016 100%);
+.tile:hover { border-color: var(--green-mid); box-shadow: 0 8px 22px rgba(0,122,73,.1); transform: translateY(-1px); }
+.tile-banner {
+  position: relative; aspect-ratio: 16 / 10; background: #04150d; overflow: hidden;
 }
-.poster .p-brand { font-size: 9px; letter-spacing: .2em; font-weight: 700; opacity: .72; }
-.poster .p-name { margin-top: 6px; font-size: 13px; font-weight: 700; line-height: 1.3; }
-.poster .p-prize { margin-top: 6px; font-size: 11px; color: var(--gold); font-weight: 600; }
-.proj-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-.proj-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.proj-title { font-size: 17px; font-weight: 700; }
-.also { font-size: 13px; color: var(--muted); font-weight: 500; }
-.status { height: 22px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; }
+.tile-banner img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.tile-banner.kv-poster img { object-position: center 18%; }
+.status {
+  position: absolute; top: 12px; right: 12px; height: 24px; padding: 0 10px;
+  border-radius: 999px; font-size: 12px; font-weight: 600;
+  display: inline-flex; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,.18);
+}
 .status.live { background: var(--green-soft); color: var(--green); }
-.status.done { background: #EEEBE7; color: var(--muted); }
-.status.soon { background: transparent; color: var(--muted); border: 1px solid var(--line-strong); }
-.proj-meta { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
-.proj-meta span { display: inline-flex; align-items: center; gap: 6px; }
-.growth { display: inline-flex; align-items: baseline; gap: 8px; padding: 6px 12px; border-radius: 8px; background: var(--green-pale); border: 1px solid #CDE6D8; width: fit-content; }
-.growth b { font-size: 18px; color: var(--green); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.growth em { font-style: normal; font-size: 12px; color: var(--muted); font-weight: 500; }
-.proj-side { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; }
-.empty {
-  display: none; text-align: center; padding: 40px 24px; color: var(--muted); font-size: 14px;
-  background: #fff; border-radius: var(--radius); border: 1px dashed var(--line-strong);
+.status.done { background: rgba(255,255,255,.92); color: var(--muted); }
+.tile-body { padding: 18px 20px 18px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.tile-title { font-size: 17px; font-weight: 700; line-height: 1.35; }
+.tile-date { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.tile-dl { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.tile-dl > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.tile-dl dt { font-size: 13px; color: var(--muted); font-weight: 500; }
+.tile-dl dd { font-size: 13px; color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
+.tile-dl dd.up { color: var(--green); font-size: 18px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; }
+.tile-dl dd.up em { font-style: normal; margin-left: 6px; font-size: 13px; color: var(--muted); font-weight: 500; }
+.more {
+  margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;
+  font-size: 13px; font-weight: 600; color: var(--green);
 }
-.empty.show { display: block; }
+.tile:hover .more { color: var(--green-deep); }
 .foot-note { font-size: 11px; color: var(--faint); padding: 0 4px; }
   </style>
 </head>
@@ -172,7 +154,7 @@ a { color: inherit; text-decoration: none; }
         <h1>專案成效分析</h1>
         <div class="actions">
           <button class="btn" type="button">重新整理</button>
-          <button class="btn primary" type="button">+ 新增專案</button>
+          <a class="btn primary" href="brief.html">+ 新增專案</a>
         </div>
       </div>
       <section class="stat-row" aria-label="專案概況">
@@ -180,131 +162,76 @@ a { color: inherit; text-decoration: none; }
           <div class="k">專案總數</div>
           <div class="v">3</div>
         </div>
-        <div class="stat live">
+        <div class="stat">
           <div class="k">進行中</div>
           <div class="v">1</div>
-        </div>
-        <div class="stat">
-          <div class="k">已結束</div>
-          <div class="v">2</div>
         </div>
         <div class="stat">
           <div class="k">尚未開始</div>
           <div class="v">0</div>
         </div>
       </section>
-      <div class="toolbar">
-        <div class="chips" role="tablist" aria-label="狀態篩選">
-          <button class="chip on" type="button" data-filter="all">全部</button>
-          <button class="chip" type="button" data-filter="live">進行中</button>
-          <button class="chip" type="button" data-filter="done">已結束</button>
-          <button class="chip" type="button" data-filter="soon">尚未開始</button>
-        </div>
-        <input class="search" id="q" type="search" placeholder="搜尋專案名稱" aria-label="搜尋專案名稱" />
-      </div>
-      <section class="list" id="list" aria-label="專案列表">
-        <a class="proj" href="index.html" data-status="live" data-title="買台啤抽元大0050等值現金 台啤 AI 鏈鏈看">
-          <div class="proj-kv"><img src="campaign.png" alt="台啤 AI 鏈鏈看"></div>
-          <div class="proj-main">
-            <div class="proj-title-row">
-              <h2 class="proj-title">買台啤抽元大0050等值現金</h2>
-              <span class="status live">進行中</span>
-            </div>
-            <p class="also">台啤 AI 鏈鏈看</p>
-            <div class="proj-meta">
-              <span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
-                2026/08/19–2026/10/02
-              </span>
-              <span>建立者 tednology</span>
-              <span>建立日期 2026/08/18</span>
-            </div>
-            <div class="growth"><em>會員成長</em><b>+1.9%</b><em>(+374)</em></div>
+      <section class="grid" aria-label="專案列表">
+        <a class="tile" href="index.html">
+          <div class="tile-banner kv-poster">
+            <img src="campaign.png" alt="買台啤抽元大0050等值現金">
+            <span class="status live">進行中</span>
           </div>
-          <div class="proj-side">
-            <span class="btn">查看成效</span>
+          <div class="tile-body">
+            <h2 class="tile-title">買台啤抽元大0050等值現金</h2>
+            <p class="tile-date">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
+              2026/08/19–10/02
+            </p>
+            <dl class="tile-dl">
+              <div><dt>會員成長</dt><dd class="up">+1.9%<em>(+374)</em></dd></div>
+              <div><dt>建立者</dt><dd>tednology</dd></div>
+              <div><dt>建立日期</dt><dd>2026/08/18</dd></div>
+            </dl>
+            <span class="more">查看詳情 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span>
           </div>
         </a>
-        <a class="proj" href="jiexian.html" data-status="done" data-title="真假傑憲大挑戰 真假傑憲大考驗">
-          <div class="proj-kv">
-            <img src="jiexian.png" alt="真假傑憲 結案報告">
+        <a class="tile" href="jiexian.html">
+          <div class="tile-banner">
+            <img src="jiexian.png" alt="真假傑憲大挑戰">
+            <span class="status done">已結束</span>
           </div>
-          <div class="proj-main">
-            <div class="proj-title-row">
-              <h2 class="proj-title">真假傑憲大挑戰</h2>
-              <span class="status done">已結束</span>
-            </div>
-            <p class="also">真假傑憲大考驗!</p>
-            <div class="proj-meta">
-              <span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
-                2026/04/20–2026/05/07
-              </span>
-              <span>建立者 tednology</span>
-              <span>建立日期 2026/04/10</span>
-            </div>
-            <div class="growth"><em>會員成長</em><b>+87%</b><em>(+10,323)</em></div>
-          </div>
-          <div class="proj-side">
-            <span class="btn">查看成效</span>
+          <div class="tile-body">
+            <h2 class="tile-title">真假傑憲大挑戰</h2>
+            <p class="tile-date">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
+              2026/04/20–05/07
+            </p>
+            <dl class="tile-dl">
+              <div><dt>會員成長</dt><dd class="up">+87%<em>(+10,323)</em></dd></div>
+              <div><dt>建立者</dt><dd>tednology</dd></div>
+              <div><dt>建立日期</dt><dd>2026/04/10</dd></div>
+            </dl>
+            <span class="more">查看詳情 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span>
           </div>
         </a>
-        <a class="proj" href="tokyo.html" data-status="done" data-title="喝台啤抽東京雙人來回機票">
-          <div class="proj-kv">
-            <img src="tokyo.png" alt="成就經典 結案報告">
+        <a class="tile" href="tokyo.html">
+          <div class="tile-banner">
+            <img src="tokyo.png" alt="喝台啤抽東京雙人來回機票">
+            <span class="status done">已結束</span>
           </div>
-          <div class="proj-main">
-            <div class="proj-title-row">
-              <h2 class="proj-title">喝台啤抽東京雙人來回機票</h2>
-              <span class="status done">已結束</span>
-            </div>
-            <div class="proj-meta">
-              <span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
-                2026/01/14–2026/03/31
-              </span>
-              <span>建立者 tednology</span>
-              <span>建立日期 2026/01/08</span>
-            </div>
-            <div class="growth"><em>會員成長</em><b>+54.4%</b><em>(+3,455)</em></div>
-          </div>
-          <div class="proj-side">
-            <span class="btn">查看成效</span>
+          <div class="tile-body">
+            <h2 class="tile-title">喝台啤抽東京雙人來回機票</h2>
+            <p class="tile-date">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
+              2026/01/14–03/31
+            </p>
+            <dl class="tile-dl">
+              <div><dt>會員成長</dt><dd class="up">+54.4%<em>(+3,455)</em></dd></div>
+              <div><dt>建立者</dt><dd>tednology</dd></div>
+              <div><dt>建立日期</dt><dd>2026/01/08</dd></div>
+            </dl>
+            <span class="more">查看詳情 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span>
           </div>
         </a>
       </section>
-      <div class="empty" id="empty">目前沒有符合條件的專案</div>
       <p class="foot-note">TAIWAN BEER CRM · 專案成效分析總表示意頁 · 資料同步 2026/08/27 13:33（UTC+8）</p>
     </main>
   </div>
-<script>
-(function () {
-  const chips = document.querySelectorAll(".chip[data-filter]");
-  const search = document.getElementById("q");
-  const cards = document.querySelectorAll(".proj");
-  const empty = document.getElementById("empty");
-  let filter = "all";
-  function apply() {
-    const q = (search.value || "").trim().toLowerCase();
-    let shown = 0;
-    cards.forEach((card) => {
-      const okStatus = filter === "all" || card.dataset.status === filter;
-      const okQ = !q || (card.dataset.title || "").toLowerCase().includes(q);
-      const show = okStatus && okQ;
-      card.hidden = !show;
-      if (show) shown++;
-    });
-    empty.classList.toggle("show", shown === 0);
-  }
-  chips.forEach((chip) => {
-    chip.addEventListener("click", () => {
-      filter = chip.dataset.filter;
-      chips.forEach((c) => c.classList.toggle("on", c === chip));
-      apply();
-    });
-  });
-  search.addEventListener("input", apply);
-})();
-</script>
 </body>
 </html>
