@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>專案成效分析 · TAIWAN BEER</title>
+  <title>比較專案 · TAIWAN BEER</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -115,6 +115,97 @@ a { color: inherit; text-decoration: none; }
 }
 .tile:hover .more { color: var(--green-deep); }
 .foot-note { font-size: 11px; color: var(--faint); padding: 0 4px; }
+
+.crumbs a { color: var(--muted); }
+.crumbs a:hover { color: var(--green); }
+.btn:focus-visible, .tile:focus-visible, .icon-btn:focus-visible, .chip:focus-visible, .seg button:focus-visible, .camp-pick input:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid rgba(228,219,210,.6); }
+.card-h { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--line); gap: 16px; }
+.card-h h2 { font-size: 15px; font-weight: 700; }
+.card-h .sub { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+.card-b { padding: 24px; }
+.vendor-note {
+  font-size: 13px; color: var(--muted); line-height: 1.65;
+  padding: 12px 16px; border-radius: 8px;
+  background: var(--green-pale); border: 1px solid #CDE6D8;
+}
+.vendor-note b { color: var(--text); font-weight: 600; }
+.ctrl-grid { display: grid; grid-template-columns: 1.35fr .9fr; gap: 28px; align-items: start; }
+.ctrl-k { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .04em; margin-bottom: 12px; }
+.picks { display: flex; flex-direction: column; gap: 8px; }
+.camp-pick {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; cursor: pointer;
+}
+.camp-pick:hover { border-color: var(--green-mid); }
+.camp-pick:has(input:checked) { border-color: var(--green); background: var(--green-pale); }
+.camp-pick input { width: 16px; height: 16px; accent-color: var(--green); flex-shrink: 0; }
+.swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.camp-pick .lab { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+.camp-pick .lab b { font-weight: 700; }
+.camp-pick .lab span.name { color: var(--text); font-weight: 500; }
+.status.done { background: #EDE8E2; color: #6F6A64; }
+.fake-pill {
+  height: 22px; padding: 0 8px; border-radius: 999px;
+  background: #FFF6DF; color: #8A6414; border: 1px solid #E8D7A0;
+  font-size: 11px; font-weight: 700; display: inline-flex; align-items: center;
+}
+.dims { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong);
+  background: #fff; font-size: 13px; font-weight: 500; color: var(--muted);
+}
+.chip:hover { border-color: var(--green); color: var(--green); }
+.chip.on { background: var(--green); border-color: var(--green); color: #fff; }
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 16px; flex-wrap: wrap; }
+.hint { font-size: 12px; color: var(--muted); }
+.hint b { color: var(--text); font-weight: 600; }
+.seg { display: inline-flex; background: #F6F2EE; border-radius: 8px; padding: 2px; }
+.seg button { height: 28px; padding: 0 12px; border: 0; background: transparent; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.seg button.on { background: #fff; color: var(--green); box-shadow: var(--shadow); }
+.chart-wrap { position: relative; height: 320px; }
+.chart-foot {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line);
+  font-size: 13px; color: var(--muted); gap: 16px; flex-wrap: wrap;
+}
+.chart-foot strong { color: var(--text); font-size: 15px; font-variant-numeric: tabular-nums; }
+.sums { display: flex; flex-wrap: wrap; gap: 16px; }
+.sum-item { display: inline-flex; align-items: baseline; gap: 6px; }
+.sum-item i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.axis-note { font-size: 12px; color: var(--faint); max-width: 420px; line-height: 1.55; text-align: right; }
+.legend-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.legend-row span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); font-weight: 500; }
+.legend-row i { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
+.mini-grid { display: grid; gap: 16px; align-items: stretch; }
+.mini-grid.cols-1 { grid-template-columns: minmax(0, 1fr); }
+.mini-grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mini-grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mini {
+  border: 1px solid var(--line); border-radius: 8px; padding: 16px 16px 12px;
+  background: #fff; min-width: 0; display: flex; flex-direction: column; gap: 12px;
+}
+.mini-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mini-h h3 { font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.donut-box { display: flex; align-items: center; gap: 16px; }
+.donut-box canvas { width: 148px !important; height: 148px !important; flex-shrink: 0; }
+.legend { display: flex; flex-direction: column; gap: 12px; flex: 1; min-width: 0; }
+.legend li { display: grid; grid-template-columns: 10px 1fr auto; gap: 8px; align-items: center; font-size: 13px; list-style: none; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.legend .pct { font-weight: 700; font-variant-numeric: tabular-nums; }
+.legend .cnt { color: var(--muted); font-size: 12px; grid-column: 2; margin-top: -8px; }
+.hbar { position: relative; height: 260px; }
+.empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; min-height: 180px; padding: 28px 16px; gap: 6px;
+  color: var(--muted); font-size: 13px; flex: 1;
+}
+.empty small { font-size: 11px; color: var(--faint); font-weight: 400; }
+.empty.page-empty { min-height: 240px; }
+
+.camp-pick .status, .mini .status { position: static; box-shadow: none; }
+.page { gap: 16px; }
+
   </style>
 </head>
 <body>
@@ -146,93 +237,41 @@ a { color: inherit; text-decoration: none; }
       </div>
     </header>
     <div class="crumbs">
-      <span>專案管理 / <b>專案成效分析</b></span>
+      <span>專案管理 / <a href="projects.html">專案成效分析</a> / <b>比較專案</b></span>
       <span class="updated">Last updated <time datetime="2026-08-27T13:33:00+08:00">2026/08/27 13:33</time></span>
     </div>
     <main class="page">
       <div class="page-head">
-        <h1>專案成效分析</h1>
+        <h1>比較專案</h1>
         <div class="actions">
-          <button class="btn" type="button">重新整理</button>
-          <a class="btn" href="compare.html">比較專案</a>
-          <a class="btn primary" href="brief.html">+ 新增專案</a>
+          <a class="btn" href="projects.html">返回專案列表</a>
         </div>
       </div>
-      <section class="stat-row" aria-label="專案概況">
-        <div class="stat">
-          <div class="k">專案總數</div>
-          <div class="v">3</div>
-        </div>
-        <div class="stat">
-          <div class="k">進行中</div>
-          <div class="v">1</div>
-        </div>
-        <div class="stat">
-          <div class="k">尚未開始</div>
-          <div class="v">0</div>
+      <p class="vendor-note">比較頁只讀各專案成效已有的指標，不另開 GA 事件。某檔沒有該維度就留空。<b>傑憲／東京此頁為示意數據，方便對齊維度。</b></p>
+      <section class="card" aria-label="比較條件">
+        <div class="card-b">
+          <div class="ctrl-grid">
+            <div>
+              <div class="ctrl-k">專案</div>
+              <div class="picks" id="projectPicks"></div>
+            </div>
+            <div>
+              <div class="ctrl-k">維度</div>
+              <div class="dims" id="dimPicks" role="tablist" aria-label="比較維度"></div>
+            </div>
+          </div>
         </div>
       </section>
-      <section class="grid" aria-label="專案列表">
-        <a class="tile" href="index.html">
-          <div class="tile-banner kv-poster">
-            <img src="campaign.png" alt="買台啤抽元大0050等值現金">
-            <span class="status live">進行中</span>
-          </div>
-          <div class="tile-body">
-            <h2 class="tile-title">買台啤抽元大0050等值現金</h2>
-            <p class="tile-date">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
-              2026/08/19–10/02
-            </p>
-            <dl class="tile-dl">
-              <div><dt>會員成長</dt><dd class="up">+1.9%<em>(+374)</em></dd></div>
-              <div><dt>建立者</dt><dd>tednology</dd></div>
-              <div><dt>建立日期</dt><dd>2026/08/18</dd></div>
-            </dl>
-            <span class="more">查看詳情 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span>
-          </div>
-        </a>
-        <a class="tile" href="jiexian.html">
-          <div class="tile-banner">
-            <img src="jiexian.png" alt="真假傑憲大挑戰">
-            <span class="status done">已結束</span>
-          </div>
-          <div class="tile-body">
-            <h2 class="tile-title">真假傑憲大挑戰</h2>
-            <p class="tile-date">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
-              2026/04/20–05/07
-            </p>
-            <dl class="tile-dl">
-              <div><dt>會員成長</dt><dd class="up">+87%<em>(+10,323)</em></dd></div>
-              <div><dt>建立者</dt><dd>tednology</dd></div>
-              <div><dt>建立日期</dt><dd>2026/04/10</dd></div>
-            </dl>
-            <span class="more">查看詳情 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span>
-          </div>
-        </a>
-        <a class="tile" href="tokyo.html">
-          <div class="tile-banner">
-            <img src="tokyo.png" alt="喝台啤抽東京雙人來回機票">
-            <span class="status done">已結束</span>
-          </div>
-          <div class="tile-body">
-            <h2 class="tile-title">喝台啤抽東京雙人來回機票</h2>
-            <p class="tile-date">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
-              2026/01/14–03/31
-            </p>
-            <dl class="tile-dl">
-              <div><dt>會員成長</dt><dd class="up">+54.4%<em>(+3,455)</em></dd></div>
-              <div><dt>建立者</dt><dd>tednology</dd></div>
-              <div><dt>建立日期</dt><dd>2026/01/08</dd></div>
-            </dl>
-            <span class="more">查看詳情 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span>
-          </div>
-        </a>
+      <section class="card" id="resultsCard" aria-label="比較結果">
+        <div class="card-h">
+          <h2 id="resultsTitle">登錄次數<span class="sub">成效總覽 · 活動第 N 天</span></h2>
+        </div>
+        <div class="card-b" id="resultsBody"></div>
       </section>
-      <p class="foot-note">TAIWAN BEER CRM · 專案成效分析總表示意頁 · 資料同步 2026/08/27 13:33（UTC+8）</p>
+      <p class="foot-note">比較頁示意 · 0050 數字與成效頁相同來源；傑憲／東京此頁為示意數據，方便對齊維度。</p>
     </main>
   </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<script src="compare.js"></script>
 </body>
 </html>
