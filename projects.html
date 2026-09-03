@@ -67,7 +67,7 @@ a { color: inherit; text-decoration: none; }
 .btn:hover { border-color: var(--green); color: var(--green); }
 .btn.primary { background: var(--green); border-color: var(--green); color: #fff; }
 .btn.primary:hover { background: var(--green-deep); color: #fff; }
-.btn:focus-visible, .tile:focus-visible, .icon-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.btn:focus-visible, .tile:focus-visible, .icon-btn:focus-visible, .seg button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 .page-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .page-head h1 { font-size: 20px; font-weight: 700; }
 .actions { display: flex; gap: 8px; }
@@ -115,6 +115,41 @@ a { color: inherit; text-decoration: none; }
 }
 .tile:hover .more { color: var(--green-deep); }
 .foot-note { font-size: 11px; color: var(--faint); padding: 0 4px; }
+.seg { display: inline-flex; background: #F6F2EE; border-radius: 8px; padding: 2px; align-self: flex-start; }
+.seg button { height: 28px; padding: 0 12px; border: 0; background: transparent; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.seg button.on { background: #fff; color: var(--green); box-shadow: var(--shadow); }
+.status.static { position: static; box-shadow: none; }
+.status.done.static { background: #EEEAE6; }
+.grid[hidden], .compare-card[hidden] { display: none; }
+.compare-card {
+  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+  border: 1px solid rgba(228,219,210,.6); overflow-x: auto;
+}
+.compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.compare-table th, .compare-table td {
+  padding: 12px 16px; border-bottom: 1px solid var(--line);
+  text-align: right; white-space: nowrap; vertical-align: middle;
+}
+.compare-table th:nth-child(1), .compare-table td:nth-child(1),
+.compare-table th:nth-child(2), .compare-table td:nth-child(2),
+.compare-table th:nth-child(3), .compare-table td:nth-child(3) { text-align: left; }
+.compare-table thead th {
+  font-size: 12px; font-weight: 600; color: var(--muted); background: #FAF7F4;
+  user-select: none;
+}
+.compare-table thead th.s { cursor: pointer; }
+.compare-table thead th.s:hover, .compare-table thead th.active { color: var(--green); }
+.compare-table tbody tr { cursor: pointer; }
+.compare-table tbody tr:hover { background: #FBF9F6; }
+.compare-table tbody tr:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+.compare-table .name { font-weight: 600; color: var(--text); white-space: normal; min-width: 168px; }
+.compare-table .metric { font-variant-numeric: tabular-nums; font-weight: 600; }
+.compare-table .empty { color: var(--faint); font-weight: 400; }
+.compare-table .growth { color: #007A49; font-weight: 700; font-variant-numeric: tabular-nums; }
+.compare-table .growth em { font-style: normal; margin-left: 6px; font-size: 12px; color: var(--muted); font-weight: 500; }
+.th-hint { display: block; font-size: 10px; font-weight: 400; color: var(--faint); margin-top: 2px; }
+.caret { font-size: 10px; margin-left: 4px; }
+.compare-caption { font-size: 12px; color: var(--muted); padding: 12px 16px 16px; line-height: 1.55; }
   </style>
 </head>
 <body>
@@ -171,7 +206,11 @@ a { color: inherit; text-decoration: none; }
           <div class="v">0</div>
         </div>
       </section>
-      <section class="grid" aria-label="專案列表">
+      <div class="seg" role="group" aria-label="檢視方式">
+        <button type="button" id="btn-tiles" class="on" aria-pressed="true">磁磚</button>
+        <button type="button" id="btn-compare" aria-pressed="false">比較表</button>
+      </div>
+      <section class="grid" id="tile-view" aria-label="專案列表">
         <a class="tile" href="index.html">
           <div class="tile-banner kv-poster">
             <img src="campaign.png" alt="買台啤抽元大0050等值現金">
@@ -230,8 +269,152 @@ a { color: inherit; text-decoration: none; }
           </div>
         </a>
       </section>
+      <section class="compare-card" id="compare-view" hidden aria-label="專案比較表">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>專案</th>
+              <th>狀態</th>
+              <th>檔期</th>
+              <th class="s" data-key="days">天數<span class="caret"></span></th>
+              <th class="s" data-key="friends">新增好友<span class="caret"></span></th>
+              <th class="s" data-key="bind">新增綁定<span class="caret"></span></th>
+              <th class="s" data-key="visits">造訪<span class="caret"></span></th>
+              <th class="s" data-key="growth">會員成長<span class="caret"></span></th>
+              <th class="s" data-key="cac">獲客成本<span class="caret"></span><span class="th-hint">有才顯示</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr tabindex="0" data-href="index.html">
+              <td class="name">買台啤抽元大0050等值現金</td>
+              <td><span class="status live static">進行中</span></td>
+              <td>2026/08/19–10/02</td>
+              <td class="metric" data-val="45">45</td>
+              <td class="empty" data-val="">—</td>
+              <td class="metric" data-val="773">773</td>
+              <td class="metric" data-val="1087">1,087</td>
+              <td class="growth" data-val="1.9">+1.9%<em>(+374)</em></td>
+              <td class="empty" data-val="">—</td>
+            </tr>
+            <tr tabindex="0" data-href="jiexian.html">
+              <td class="name">真假傑憲大挑戰</td>
+              <td><span class="status done static">已結束</span></td>
+              <td>2026/04/20–05/07</td>
+              <td class="metric" data-val="17">17</td>
+              <td class="metric" data-val="9729">+9,729</td>
+              <td class="metric" data-val="10323">+10,323</td>
+              <td class="metric" data-val="21000">21,000</td>
+              <td class="growth" data-val="87">+87%<em>(+10,323)</em></td>
+              <td class="metric" data-val="34">34 元</td>
+            </tr>
+            <tr tabindex="0" data-href="tokyo.html">
+              <td class="name">喝台啤抽東京雙人來回機票</td>
+              <td><span class="status done static">已結束</span></td>
+              <td>2026/01/14–03/31</td>
+              <td class="metric" data-val="77">77</td>
+              <td class="empty" data-val="">—</td>
+              <td class="empty" data-val="">—</td>
+              <td class="metric" data-val="27148">27,148</td>
+              <td class="growth" data-val="54.4">+54.4%<em>(+3,455)</em></td>
+              <td class="empty" data-val="">—</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="compare-caption">進行中數字為 2026/09/01 同步；已結束為結案合計。沒有的指標留空，不編造。</p>
+      </section>
       <p class="foot-note">TAIWAN BEER CRM · 專案成效分析總表示意頁 · 資料同步 2026/08/27 13:33（UTC+8）</p>
     </main>
   </div>
+  <script>
+  (function () {
+    var tilesBtn = document.getElementById("btn-tiles");
+    var compareBtn = document.getElementById("btn-compare");
+    var tileView = document.getElementById("tile-view");
+    var compareView = document.getElementById("compare-view");
+    var table = compareView.querySelector(".compare-table");
+    var tbody = table.querySelector("tbody");
+    var originalRows = Array.prototype.slice.call(tbody.rows);
+    var sortState = { key: null, dir: 1 };
+
+    function isCompare() {
+      return location.hash === "#compare";
+    }
+
+    function applyView() {
+      var compare = isCompare();
+      tileView.hidden = compare;
+      compareView.hidden = !compare;
+      tilesBtn.classList.toggle("on", !compare);
+      compareBtn.classList.toggle("on", compare);
+      tilesBtn.setAttribute("aria-pressed", String(!compare));
+      compareBtn.setAttribute("aria-pressed", String(compare));
+    }
+
+    function setTiles() {
+      if (location.hash) {
+        history.replaceState(null, "", location.pathname + location.search);
+      }
+      applyView();
+    }
+
+    function setCompare() {
+      if (location.hash !== "#compare") {
+        location.hash = "compare";
+      } else {
+        applyView();
+      }
+    }
+
+    tilesBtn.addEventListener("click", setTiles);
+    compareBtn.addEventListener("click", setCompare);
+    window.addEventListener("hashchange", applyView);
+    applyView();
+
+    function go(tr) {
+      var href = tr && tr.getAttribute("data-href");
+      if (href) location.href = href;
+    }
+
+    tbody.addEventListener("click", function (e) {
+      go(e.target.closest("tr"));
+    });
+    tbody.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      var tr = e.target.closest("tr");
+      if (!tr) return;
+      e.preventDefault();
+      go(tr);
+    });
+
+    var keyIndex = { days: 3, friends: 4, bind: 5, visits: 6, growth: 7, cac: 8 };
+    table.querySelectorAll("thead th.s").forEach(function (th) {
+      th.addEventListener("click", function () {
+        var key = th.getAttribute("data-key");
+        var col = keyIndex[key];
+        if (sortState.key === key) sortState.dir *= -1;
+        else { sortState.key = key; sortState.dir = -1; }
+        var rows = Array.prototype.slice.call(tbody.rows);
+        rows.sort(function (a, b) {
+          var av = a.cells[col].getAttribute("data-val");
+          var bv = b.cells[col].getAttribute("data-val");
+          var aEmpty = av === "" || av == null;
+          var bEmpty = bv === "" || bv == null;
+          if (aEmpty && bEmpty) return 0;
+          if (aEmpty) return 1;
+          if (bEmpty) return -1;
+          var n = parseFloat(av) - parseFloat(bv);
+          if (n === 0) return originalRows.indexOf(a) - originalRows.indexOf(b);
+          return n * sortState.dir;
+        });
+        rows.forEach(function (row) { tbody.appendChild(row); });
+        table.querySelectorAll("thead th.s").forEach(function (h) {
+          h.classList.toggle("active", h === th);
+          var caret = h.querySelector(".caret");
+          caret.textContent = h === th ? (sortState.dir < 0 ? "▾" : "▴") : "";
+        });
+      });
+    });
+  })();
+  </script>
 </body>
 </html>
