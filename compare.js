@@ -14,11 +14,11 @@ function weekBuckets(arr) {
   return values;
 }
 
-/* 0050 — live CRM analytics 2026/08/19–09/01（同步 09/22 15:48） */
-const VIS_0050 = [185,42,40,117,67,150,47,35,16,127,96,77,75,77];
-const BIND_0050 = [40,18,38,82,57,75,29,32,14,39,85,89,66,109];
-const INV_0050 = [151,189,182,191,177,143,168,195,174,175,233,231,183,184];
-const CAN_0050 = [1457,2167,1619,2344,1686,1086,1442,1352,2376,1379,1684,1810,1435,1884];
+/* 0050 — live CRM 活動全程 2026/08/19–09/29（同步 09/22 16:26；KPI 訪客 2573／發票 7730 與日加總略差，照 CRM 卡片） */
+const VIS_0050 = [185,42,40,117,67,150,47,35,16,127,96,77,75,77,171,109,93,71,57,191,80,46,42,89,60,34,36,82,45,45,20,22,23,78,18,0,0,0,0,0,0,0];
+const BIND_0050 = [40,18,38,82,57,75,29,32,14,39,85,89,66,109,125,119,84,64,42,120,76,42,42,58,44,37,37,63,45,31,23,24,27,68,23,0,0,0,0,0,0,0];
+const INV_0050 = [151,189,182,191,177,143,168,195,174,175,233,231,183,184,325,203,412,391,224,248,200,186,203,726,219,238,173,172,185,209,215,229,202,150,4,0,0,0,0,0,0,0];
+const CAN_0050 = [1457,2167,1619,2344,1686,1086,1442,1352,2376,1379,1684,1810,1435,1884,2357,1371,7038,6183,2167,2832,1507,1298,1402,19172,2043,2213,1215,1189,1582,1653,1671,1561,1607,1217,5,0,0,0,0,0,0,0];
 
 /* WBC／東京 — 結案 tokyo_brief：發票＝抽卡；罐數＝發票×4；人數列見週報 */
 const WEEK_INV_TOKYO = [462,815,1067,1913,1221];
@@ -98,27 +98,29 @@ const PROJECTS = [
     statusKind: "live",
     fake: false,
     color: "#007A49",
-    days: 14,
+    days: 42,
+    lastSynced: "2026/09/22 16:26",
     href: "index.html",
-    visits: { daily: VIS_0050, weekly: [648,503], unit: "人" },
-    binds: { daily: BIND_0050, weekly: [339,434], unit: "人" },
-    invoices: { daily: INV_0050, weekly: [1201,1375], unit: "張" },
-    cans: { daily: CAN_0050, weekly: [11801,11920], unit: "罐" },
+    /* KPI 卡片（活動全程）：訪客 2573、發票 7730；日／週加總為 2563／7690，照 CRM 分記 */
+    visits: { daily: VIS_0050, weekly: [648,503,772,389,251,0], unit: "人", kpiTotal: 2573 },
+    binds: { daily: BIND_0050, weekly: [339,434,630,323,241,0], unit: "人", kpiTotal: 1967 },
+    invoices: { daily: INV_0050, weekly: [1201,1375,2003,1917,1194,0], unit: "張", kpiTotal: 7730 },
+    cans: { daily: CAN_0050, weekly: [11801,11920,23455,28532,9296,0], unit: "罐", kpiTotal: 85004 },
     gender: {
-      total: 1151, unit: "人",
+      total: 2573, unit: "人",
       items: [
-        { label: "男", n: 655, pct: 56.9, color: "#007A49" },
-        { label: "女", n: 345, pct: 30.0, color: "#5CB88A" },
-        { label: "未揭露", n: 151, pct: 13.1, color: "#E0B34E" }
+        { label: "男", n: 1380, pct: 53.6, color: "#007A49" },
+        { label: "女", n: 871, pct: 33.9, color: "#5CB88A" },
+        { label: "未揭露", n: 322, pct: 12.5, color: "#E0B34E" }
       ]
     },
-    /* 0050 通路：合格發票通路登錄次數（CRM 同步 2026/09/22 16:26） */
+    /* 0050 通路：合格發票通路登錄次數合計 7695（CRM 同步 2026/09/22 16:26） */
     channel: {
       labels: ["全家", "7-ELEVEN", "其他通路", "全聯", "美廉社", "萊爾富", "家樂福", "好市多"],
       data: [2089, 1996, 1343, 1329, 749, 134, 45, 10],
       unit: "次"
     },
-    product: { labels: ["金牌","金牌 ONE","經典","雲泡","爽啤","18天","其他"], data: [55297,12325,9917,2311,2270,2147,830], unit: "罐" }
+    product: { labels: ["金牌","金牌 ONE","經典","雲泡","爽啤","18天","其他"], data: [55298,12325,9917,2311,2270,2147,830], unit: "罐" }
   },
   {
     id: "jiexian",
@@ -251,7 +253,9 @@ function peopleRangeValue(p, key, grain, from, to, maxN) {
   if (arr && arr.length) {
     const sliced = sliceSeries(arr, from, Math.min(to, arr.length));
     if (from > arr.length) return { kind: "short", value: null };
-    return { kind: "series", value: sliced.reduce((a, b) => a + b, 0), unit: s.unit, metric: s.label };
+    let value = sliced.reduce((a, b) => a + b, 0);
+    if (isFullRange(from, to, maxN) && s.kpiTotal != null) value = s.kpiTotal;
+    return { kind: "series", value, unit: s.unit, metric: s.label };
   }
   const total = key === "visits" ? p.visitsTotal : (key === "binds" ? p.bindsTotal : null);
   if (total != null) {
@@ -573,7 +577,8 @@ function renderSeries(picks, dim) {
         const full = grainArr(p[key], grain);
         const arr = sliceSeries(full, from, to);
         const metric = (p[key].label || dimLabel);
-        const shown = arr.length ? arr.reduce((a, b) => a + b, 0) : 0;
+        let shown = arr.length ? arr.reduce((a, b) => a + b, 0) : 0;
+        if (isFullRange(from, to, maxN) && p[key].kpiTotal != null) shown = p[key].kpiTotal;
         return '<span class="sum-item"><i style="background:' + p.color + '"></i>' + p.short +
           " · " + metric + "（區間）<strong>" + fmt(shown) + "</strong> " + p[key].unit +
           (full.length < from ? " · 此檔期較短" : "") + "</span>";
