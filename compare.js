@@ -112,9 +112,12 @@ const PROJECTS = [
         { label: "未揭露", n: 151, pct: 13.1, color: "#E0B34E" }
       ]
     },
-    /* 0050 通路（category bars）— CRM 尚未提供 labels+values；勿捏造數字。
-       就緒時改成：channel: { labels: ["7-ELEVEN", ...], data: [n, ...], unit: "筆" } */
-    channel: null,
+    /* 0050 通路：合格發票通路登錄次數（CRM 同步 2026/09/22 16:26） */
+    channel: {
+      labels: ["全家", "7-ELEVEN", "其他通路", "全聯", "美廉社", "萊爾富", "家樂福", "好市多"],
+      data: [2089, 1996, 1343, 1329, 749, 134, 45, 10],
+      unit: "次"
+    },
     product: { labels: ["金牌","金牌 ONE","經典","雲泡","爽啤","18天","其他"], data: [55297,12325,9917,2311,2270,2147,830], unit: "罐" }
   },
   {
