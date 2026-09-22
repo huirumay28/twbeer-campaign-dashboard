@@ -74,7 +74,7 @@ const PROJECTS = [
     status: "已結束",
     statusKind: "done",
     fake: false,
-    color: "#298F66",
+    color: "#2B6CB0",
     days: 77,
     href: "tokyo.html",
     /* WBC：抽卡次數＝有效發票登錄次數（同一數列） */
