@@ -539,6 +539,9 @@ const WEEK_META = [
 const WEEK_INV = [462, 815, 1067, 1913, 1221];
 const WEEK_CARDS = [1951, 3441, 4505, 8077, 5155];
 const WEEK_CANS = WEEK_INV.map(n => n * 4);
+/* tokyo_brief p-13 週間數據比較 */
+const WEEK_USERS = [170, 322, 443, 544, 302]; /* 當週不重複登錄；合計 1781 */
+const WEEK_INV_PEOPLE = [609, 1074, 1406, 2520, 1608]; /* 登錄發票人數（週人次） */
 const invDaily = [];
 const cardDaily = [];
 WEEK_META.forEach((w, i) => {
@@ -548,8 +551,8 @@ WEEK_META.forEach((w, i) => {
 });
 const canDaily = invDaily.map(n => n * 4);
 const KPIS = [
-  { key: "visits", name: "不重複進站人數", total: 27148, unit: "人", cap: "結案合計 · 無週資料" },
-  { key: "users", name: "不重複登錄人數", total: 1472, unit: "人", cap: "結案合計 · 無週資料" },
+  { key: "visits", name: "不重複進站人數", total: 27148, unit: "人", cap: "結案合計 · 無日／週數列" },
+  { key: "users", name: "不重複登錄人數", total: 1472, unit: "人", weekly: WEEK_USERS, cap: "全程不重複 1,472；週＝當週不重複（五波合計 1,781）" },
   { key: "invoices", name: "抽卡次數（有效發票登錄）", total: 5478, unit: "筆", daily: invDaily, weekly: WEEK_INV },
   { key: "cards", name: "卡片發送總數", total: 23129, unit: "張", daily: cardDaily, weekly: WEEK_CARDS },
   { key: "cans", name: "登錄總罐數", total: 21912, unit: "罐", daily: canDaily, weekly: WEEK_CANS, cap: "結案推估 5,478×4" }
@@ -666,7 +669,8 @@ function chartSeries(m) {
     const to = Math.min(w.to, state.end);
     if (from > to) return;
     if (from === w.from && to === w.to) data.push(m.weekly[i]);
-    else data.push(m.daily.slice(from, to + 1).reduce((a, b) => a + b, 0));
+    else if (m.daily) data.push(m.daily.slice(from, to + 1).reduce((a, b) => a + b, 0));
+    else data.push(m.weekly[i]); /* 僅週數列：重疊波次仍用該波全值 */
     labels.push(w.label + " " + w.span);
   });
   return { labels, data };
@@ -718,6 +722,11 @@ function renderKpis() {
   row.querySelectorAll(".kpi[data-metric]").forEach(btn => {
     btn.addEventListener("click", () => {
       state.metric = btn.dataset.metric;
+      const mm = METRICS[state.metric];
+      if (mm && mm.weekly && !mm.daily) {
+        state.grain = "week";
+        document.querySelectorAll("[data-grain]").forEach(b => b.classList.toggle("on", b.dataset.grain === "week"));
+      }
       renderKpis();
       updateDailyChart();
     });
@@ -731,15 +740,21 @@ function updateDailyChart() {
   const hintEl = document.getElementById("seriesHint");
   const noteEl = document.getElementById("chartNote");
   syncSliderUI();
-  if (!m.daily) {
+  if (!m.daily && !(m.weekly && state.grain === "week")) {
     if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
     canvas.hidden = true;
     empty.hidden = false;
     document.getElementById("seriesSum").textContent = fmt(m.total);
     document.getElementById("seriesUnit").textContent = m.unit;
-    if (hintEl) { hintEl.textContent = m.cap || "結案合計 · 無日資料"; hintEl.hidden = false; }
-    if (noteEl) noteEl.textContent = m.cap || "結案報告未提供日資料。";
+    const tip = m.weekly
+      ? "結案僅有週數列，請切換「週」檢視。"
+      : (m.cap || "結案合計 · 無日資料");
+    if (hintEl) { hintEl.textContent = tip; hintEl.hidden = false; }
+    if (noteEl) noteEl.textContent = tip;
     return;
+  }
+  if (!m.daily && m.weekly && state.grain === "week") {
+    /* weekly-only path continues below via chartSeries */
   }
   canvas.hidden = false;
   empty.hidden = true;
@@ -749,7 +764,7 @@ function updateDailyChart() {
   document.getElementById("seriesSum").textContent = fmt(data.reduce((a, b) => a + b, 0));
   document.getElementById("seriesUnit").textContent = m.unit;
   if (hintEl) { hintEl.textContent = m.hint || ""; hintEl.hidden = !m.hint; }
-  if (noteEl) noteEl.textContent = m.note || CHART_NOTE || "";
+  if (noteEl) noteEl.textContent = m.note || (m.weekly && !m.daily ? "週資料來自結案報告五波週報（當週不重複；跨週可重複）。" : CHART_NOTE) || "";
   const cfg = {
     type: "line",
     data: {

@@ -20,11 +20,15 @@ const BIND_0050 = [40,18,38,82,57,75,29,32,14,39,85,89,66,109];
 const INV_0050 = [151,189,182,191,177,143,168,195,174,175,233,231,183,184];
 const CAN_0050 = [1457,2167,1619,2344,1686,1086,1442,1352,2376,1379,1684,1810,1435,1884];
 
-/* WBC／東京 — 結案：發票＝抽卡；罐數＝發票×4 */
+/* WBC／東京 — 結案 tokyo_brief：發票＝抽卡；罐數＝發票×4；人數列見週報 */
 const WEEK_INV_TOKYO = [462,815,1067,1913,1221];
 const INV_TOKYO = [32,30,32,35,35,30,36,27,29,29,32,29,28,25,33,50,57,59,50,53,49,64,57,55,49,57,52,46,56,61,75,64,65,68,65,74,67,88,69,64,68,84,67,76,73,129,144,128,108,133,133,136,150,115,109,106,133,140,123,126,63,63,85,83,71,74,84,78,76,65,60,79,59,78,67,59,77];
 const WEEK_CAN_TOKYO = [1848,3260,4268,7652,4884];
 const CAN_TOKYO = [128,120,128,140,140,120,144,108,116,116,128,116,112,100,132,200,228,236,200,212,196,256,228,220,196,228,208,184,224,244,300,256,260,272,260,296,268,352,276,256,272,336,268,304,292,516,576,512,432,532,532,544,600,460,436,424,532,560,492,504,252,252,340,332,284,296,336,312,304,260,240,316,236,312,268,236,308];
+/* 週間數據比較 p-13：當週不重複登錄（五波合計 1,781＞全程不重複 1,472，跨週可重複） */
+const WEEK_BIND_TOKYO = [170,322,443,544,302];
+/* 同頁：登錄發票人數（週人次；≠有效發票筆數 WEEK_INV）— 比較頁無人數維度，僅備查 */
+const WEEK_INV_PEOPLE_TOKYO = [609,1074,1406,2520,1608];
 
 /* 傑憲 — 結案日數列（綁定）；進站僅有合計、無日曲線；無發票／罐數 */
 const BIND_JIEXIAN = [980,3128,1911,105,34,15,42,416,138,190,96,48,81,24,71,5,8];
@@ -42,18 +46,28 @@ const OTHER_DIMS = [
 ];
 const DIMS = SERIES_DIMS.concat(OTHER_DIMS);
 
+function hasDaily(s) { return !!(s && s.daily && s.daily.length); }
+function hasWeekly(s) { return !!(s && s.weekly && s.weekly.length); }
 function seriesOf(p, key) {
   const v = p[key];
-  if (!v || !v.daily || !v.daily.length) return null;
-  return v;
+  if (!v) return null;
+  if (hasDaily(v) || hasWeekly(v)) return v;
+  return null;
 }
-
+/** 日：僅真實日數列；週：優先結案週報，否則每 7 日加總日數列 */
+function grainArr(s, grain) {
+  if (!s) return null;
+  if (grain === "week") {
+    if (hasWeekly(s)) return s.weekly;
+    if (hasDaily(s)) return weekBuckets(s.daily);
+    return null;
+  }
+  return hasDaily(s) ? s.daily : null;
+}
 function maxSeriesLen(picks, key, grain) {
   let m = 0;
   picks.forEach(p => {
-    const s = seriesOf(p, key);
-    if (!s) return;
-    const arr = grain === "day" ? s.daily : s.weekly;
+    const arr = grainArr(seriesOf(p, key), grain);
     if (arr) m = Math.max(m, arr.length);
   });
   return m;
@@ -128,11 +142,11 @@ const PROJECTS = [
     color: "#2B6CB0",
     days: 77,
     href: "tokyo.html",
-    /* 進站／不重複登錄僅合計；發票＝抽卡；罐數＝發票×4 */
+    /* 進站僅合計；不重複登錄有週數列（無日）；發票＝抽卡；罐數＝發票×4 */
     visitsTotal: 27148,
     bindsTotal: 1472,
     visits: null,
-    binds: null,
+    binds: { daily: [], weekly: WEEK_BIND_TOKYO, unit: "人", label: "不重複登錄（當週）" },
     invoices: { daily: INV_TOKYO, weekly: WEEK_INV_TOKYO, unit: "張", label: "抽卡／有效發票" },
     cans: { daily: CAN_TOKYO, weekly: WEEK_CAN_TOKYO, unit: "罐" },
     gender: null,
@@ -141,7 +155,7 @@ const PROJECTS = [
   }
 ];
 
-const state = { selected: new Set(PROJECTS.map(p => p.id)), dim: "visits", grain: "day", rangeFrom: 1, rangeTo: null };
+const state = { selected: new Set(PROJECTS.map(p => p.id)), dim: "visits", grain: "day", rangeFrom: 1, rangeTo: null, autoGrain: true };
 const charts = [];
 function killCharts() {
   while (charts.length) {
@@ -192,17 +206,26 @@ function renderPicks() {
     '<button type="button" class="chip' + (d.key === state.dim ? " on" : "") + '" data-dim="' + d.key + '" role="tab" aria-selected="' + (d.key === state.dim) + '">' + d.label + "</button>"
   ).join("");
   document.getElementById("dimPicks").querySelectorAll(".chip").forEach(btn => {
-    btn.addEventListener("click", () => { state.dim = btn.dataset.dim; state.rangeFrom = 1; state.rangeTo = null; render(); });
+    btn.addEventListener("click", () => { state.dim = btn.dataset.dim; state.rangeFrom = 1; state.rangeTo = null; state.autoGrain = true; render(); });
   });
 }
-function emptyCard(p, dimLabel, key) {
+function emptyCard(p, dimLabel, key, reason) {
+  const s = p[key];
+  let title = "無日曲線";
   let note = "此專案結案／成效沒有「" + dimLabel + "」日數列，無法畫曲線。";
-  if (key === "visits" && p.visitsTotal) note = "結案僅有合計 " + fmt(p.visitsTotal) + " 人，無日數列。";
-  if (key === "binds" && p.bindsTotal) note = "結案僅有合計 " + fmt(p.bindsTotal) + " 人，無日數列。";
+  if (reason === "weekly-only") {
+    title = "僅有週數列";
+    note = "結案僅有「" + dimLabel + "」週報五波，請切換上方「週」檢視。" +
+      (key === "binds" && p.bindsTotal ? " 全程不重複合計 " + fmt(p.bindsTotal) + " 人。" : "");
+  } else if (key === "visits" && p.visitsTotal) {
+    note = "結案僅有合計 " + fmt(p.visitsTotal) + " 人，無日／週數列。";
+  } else if (key === "binds" && p.bindsTotal && !hasWeekly(s)) {
+    note = "結案僅有合計 " + fmt(p.bindsTotal) + " 人，無日數列。";
+  }
   return '<article class="mini">' +
     '<div class="mini-h"><h3><i class="swatch" style="background:' + p.color + '"></i>' + p.short + "</h3>" +
     '<span class="status ' + p.statusKind + '">' + p.status + "</span></div>" +
-    '<div class="empty"><div>無日曲線</div><small>' + note + "</small></div></article>";
+    '<div class="empty"><div>' + title + "</div><small>" + note + "</small></div></article>";
 }
 function lineFill(hex) {
   return (c) => {
@@ -218,9 +241,15 @@ function lineFill(hex) {
 function renderSeries(picks, dim) {
   const key = dim.key;
   const dimLabel = dim.label;
-  const withData = picks.filter(p => seriesOf(p, key));
-  const missing = picks.filter(p => !seriesOf(p, key));
+  const withAny = picks.filter(p => seriesOf(p, key));
+  const weeklyOnly = withAny.filter(p => hasWeekly(p[key]) && !hasDaily(p[key]));
+  const onlyWeeklyAvail = withAny.length > 0 && withAny.every(p => !hasDaily(p[key]));
+  if (onlyWeeklyAvail) state.grain = "week";
+  else if (state.autoGrain && weeklyOnly.length) state.grain = "week";
+  state.autoGrain = false;
   const grain = state.grain;
+  const withData = withAny.filter(p => grainArr(p[key], grain));
+  const missing = picks.filter(p => !withData.includes(p));
   const maxN = maxSeriesLen(withData, key, grain);
   if (state.rangeTo == null || state.rangeTo > maxN) state.rangeTo = maxN || 1;
   clampRange(maxN || 1);
@@ -264,7 +293,7 @@ function renderSeries(picks, dim) {
     html += '<div class="chart-wrap"><canvas id="cmpLine"></canvas></div>';
     html += '<div class="chart-foot"><div class="sums">' +
       withData.map(p => {
-        const full = grain === "day" ? p[key].daily : p[key].weekly;
+        const full = grainArr(p[key], grain);
         const arr = sliceSeries(full, from, to);
         const metric = (p[key].label || dimLabel);
         const shown = arr.length ? arr.reduce((a, b) => a + b, 0) : 0;
@@ -272,13 +301,16 @@ function renderSeries(picks, dim) {
           " · " + metric + "（區間）<strong>" + fmt(shown) + "</strong> " + p[key].unit +
           (full.length < from ? " · 此檔期較短" : "") + "</span>";
       }).join("") +
-      '</div><p class="axis-note">橫軸是' + axis + "，以各檔活動第 1 " + unitWord + "為起點對齊；檔期較短的專案在超出天數處無點。" +
-      (grain === "week" ? "週切：0050／傑憲每 7 日；WBC 為結案五波週報。" : "") +
+      '</div><p class="axis-note">橫軸是' + axis + "，以各檔活動第 1 " + unitWord + "為起點對齊；檔期較短的專案在超出" + unitWord + "數處無點。" +
+      (grain === "week" ? "週切：0050／傑憲每 7 日一桶；WBC 人／發票為結案五波週報（波次長短不一，不重切 7 日）。" : "") +
       "</p></div>";
   }
   if (missing.length) {
     html += '<div class="mini-grid cols-' + Math.min(3, missing.length) + '" style="margin-top:16px">' +
-      missing.map(p => emptyCard(p, dimLabel, key)).join("") + "</div>";
+      missing.map(p => {
+        const reason = (grain === "day" && hasWeekly(p[key]) && !hasDaily(p[key])) ? "weekly-only" : "";
+        return emptyCard(p, dimLabel, key, reason);
+      }).join("") + "</div>";
   }
   document.getElementById("resultsBody").innerHTML = html;
   document.querySelectorAll("#resultsBody [data-grain]").forEach(btn => {
@@ -347,13 +379,7 @@ function renderSeries(picks, dim) {
     data: {
       labels,
       datasets: withData.map(p => {
-        const full = grain === "day" ? p[key].daily : p[key].weekly;
-        const data = sliceSeries(full, from, to).map((v, i) => {
-          const dayIndex = from + i; // 1-based absolute
-          return dayIndex <= full.length ? v : null;
-        });
-        // If campaign shorter than from, all null; if partial, sliceSeries already truncated —
-        // pad with nulls to align labels when campaign ends before `to`
+        const full = grainArr(p[key], grain);
         const padded = [];
         for (let d = from; d <= to; d++) {
           padded.push(d <= full.length ? full[d - 1] : null);
@@ -524,7 +550,7 @@ function render() {
   const dim = DIMS.find(d => d.key === state.dim);
   const isSeries = SERIES_DIMS.some(d => d.key === state.dim);
   document.getElementById("resultsTitle").innerHTML = dim.label + '<span class="sub">' + dim.where +
-    (isSeries ? " · 活動第 N 天" : " · 各檔小倍數") + "</span>";
+    (isSeries ? (" · 活動第 N " + (state.grain === "week" ? "週" : "天")) : " · 各檔小倍數") + "</span>";
   const picks = selectedProjects();
   if (!picks.length) {
     document.getElementById("resultsBody").innerHTML =
