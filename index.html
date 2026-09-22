@@ -310,9 +310,9 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
             <div class="camp-meta">
               <span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
-                2026/08/19–2026/10/02
+                2026/08/19–2026/09/29
               </span>
-              <span>資料同步 2026/08/27 13:33</span>
+              <span>資料同步 2026/09/22 15:48 · 成效數列至 9/1</span>
             </div>
           </div>
           <div class="actions">
@@ -497,7 +497,7 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
           </div>
         </div>
       </section>
-      <p class="foot-note">TAIWAN BEER CRM · 專案成效分析示意頁 · 資料同步 2026/08/27 13:33（UTC+8）</p>
+      <p class="foot-note">TAIWAN BEER CRM · 0050 成效 · 資料取自 live CRM 2026/09/22 15:48（數列 8/19–9/1）</p>
     </main>
   </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
@@ -505,7 +505,7 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 
 const fmt = (n, d = 0) => Number(n).toLocaleString("zh-TW", { minimumFractionDigits: d, maximumFractionDigits: d });
 const CAMP_START = new Date(2026, 7, 19);
-const CAMP_END = new Date(2026, 9, 2);
+const CAMP_END = new Date(2026, 8, 1); // data through 9/1 from CRM
 function eachDay(from, to) {
   const out = [];
   for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) out.push(new Date(d));
@@ -522,11 +522,10 @@ function buildSeries(head, afterFn) {
   return head.concat(rest);
 }
 const METRICS = {
-  friends: { name: "新增好友數", unit: "人", daily: buildSeries([50,62,74,99,124,347,186,161,137], (i,d) => Math.max(18, Math.round(90 + 28*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?18:0) - i*0.7))) },
-  binds:   { name: "新增綁定數", unit: "人", daily: buildSeries([36,45,53,71,89,249,134,116,97], (i,d) => Math.max(12, Math.round(64 + 20*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?12:0) - i*0.5))) },
-  visits:  { name: "造訪網站總人數 (排除重複)", unit: "人", daily: buildSeries([26,32,38,51,64,179,96,83,71], (i,d) => Math.max(10, Math.round(46 + 14*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?10:0) - i*0.35))) },
-  invoices:{ name: "發票登錄總數", unit: "次", daily: buildSeries([16,20,24,33,41,114,61,53,45], (i,d) => Math.max(6, Math.round(29 + 9*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?7:0) - i*0.22))) },
-  cans:    { name: "登錄總罐數", unit: "罐", daily: buildSeries([295,369,443,590,738,2066,1107,959,814], (i,d) => Math.max(80, Math.round(520 + 160*Math.sin(i/3.2) + (d.getDay()===0||d.getDay()===6?90:0) - i*4))) }
+  binds:   { name: "新增綁定數", unit: "人", daily: [40,18,38,82,57,75,29,32,14,39,85,89,66,109] },
+  visits:  { name: "造訪網站總人數 (排除重複)", unit: "人", daily: [185,42,40,117,67,150,47,35,16,127,96,77,75,77] },
+  invoices:{ name: "合格登錄發票張數", unit: "張", daily: [151,189,182,191,177,143,168,195,174,175,233,231,183,184] },
+  cans:    { name: "登錄總罐數", unit: "罐", daily: [1457,2167,1619,2344,1686,1086,1442,1352,2376,1379,1684,1810,1435,1884] }
 };
 Object.values(METRICS).forEach(m => { m.total = m.daily.reduce((a,b)=>a+b,0); });
 const state = { metric: "cans", grain: "day", start: 0, end: 13, loginView: "product", sortKey: "clicks", sortDir: "desc", q: "", funnelKey: "invoice" };
@@ -654,16 +653,18 @@ function updateDailyChart() {
 }
 
 const GENDER = [
-  { label: "男", pct: 30.5, n: 195, color: "#007A49" },
-  { label: "女", pct: 29.5, n: 189, color: "#5CB88A" },
-  { label: "未揭露", pct: 40.0, n: 256, color: "#E0B34E" }
+  { label: "男", pct: 56.9, n: 655, color: "#007A49" },
+  { label: "女", pct: 30.0, n: 345, color: "#5CB88A" },
+  { label: "未揭露", pct: 13.1, n: 151, color: "#E0B34E" }
 ];
 const AGE = [
-  { label: "18–20", n: 38 }, { label: "21–30", n: 192 }, { label: "31–40", n: 205 },
-  { label: "41–50", n: 109 }, { label: "51–60", n: 51 }, { label: "61+", n: 19 }, { label: "未填寫", n: 26 }
+  { label: "18–20", n: 8 }, { label: "21–30", n: 157 }, { label: "31–40", n: 368 },
+  { label: "41–50", n: 433 }, { label: "51–60", n: 155 }, { label: "61+", n: 30 }, { label: "未填寫", n: 0 }
 ];
 const REGION = [
-  { label: "北部", n: 282 }, { label: "中部", n: 166 }, { label: "南部", n: 147 }, { label: "東部", n: 45 }
+  { label: "台中市", n: 10817 }, { label: "台北市", n: 10511 }, { label: "高雄市", n: 6765 },
+  { label: "新北市", n: 5336 }, { label: "桃園市", n: 3627 }, { label: "台南市", n: 2580 },
+  { label: "彰化縣", n: 1823 }, { label: "新竹市", n: 684 }
 ];
 function renderBars(el, rows, total) {
   const max = Math.max(...rows.map(r => r.n));
@@ -704,7 +705,7 @@ function renderGender() {
         ctx.textBaseline = "middle";
         ctx.fillStyle = "#1C1C1C";
         ctx.font = "700 20px Noto Sans TC";
-        ctx.fillText("640", x, y - 8);
+        ctx.fillText("1,151", x, y - 8);
         ctx.fillStyle = "#6F6A64";
         ctx.font = "500 11px Noto Sans TC";
         ctx.fillText("總數", x, y + 12);
@@ -714,10 +715,10 @@ function renderGender() {
   });
 }
 const LOGIN = {
-  product: { hint: "登錄罐數合計 <b>7,381</b> 罐 · 金牌 one 最高", unit: "罐", labels: ["金牌 one","金牌","經典","18天","雲泡"], data: [2583,1845,1255,1033,665], hourly: false },
-  channel: { hint: "發票登錄合計 <b>407</b> 次", unit: "次", labels: ["7-11","全家","全聯","美廉社","其他"], data: [154,118,61,41,33], hourly: false },
-  source:  { hint: "流量來源合計 <b>407</b> 次", unit: "次", labels: ["LINE推播","IG","好友分享","FB","Rich Menu","Threads"], data: [122,89,73,57,41,25], hourly: false },
-  hour:    { hint: "各時段佔比 · 高峰 <b>19–21 時</b>", unit: "%", labels: Array.from({length:24}, (_,i) => String(i).padStart(2,"0")), data: [1.2,0.8,0.5,0.3,0.3,0.4,0.8,1.5,2.4,3.2,3.8,4.2,5.1,4.6,4.0,3.8,4.1,5.0,6.8,11.2,13.5,10.8,7.2,4.5], hourly: true }
+  product: { hint: "合格發票品項登錄罐數合計 <b>85,097</b> 罐 · 金牌最高（CRM 09/22）", unit: "罐", labels: ["金牌","金牌 ONE","經典","雲泡","爽啤","18天","其他"], data: [55297,12325,9917,2311,2270,2147,830], hourly: false },
+  channel: { hint: "此同步未提供通路拆分", unit: "次", labels: [], data: [], hourly: false },
+  source:  { hint: "此同步未提供來源拆分", unit: "次", labels: [], data: [], hourly: false },
+  hour:    { hint: "此同步未提供時段拆分", unit: "%", labels: [], data: [], hourly: true }
 };
 const barLabelPlugin = {
   id: "barLabel",
@@ -1040,8 +1041,8 @@ function buildReport() {
   return [
     "台啤 AI 鏈鏈看 · 結案報告",
     "================================",
-    "活動期間　2026/08/19–2026/10/02　進行中",
-    "資料同步　2026/08/27 13:33",
+    "活動期間　2026/08/19–2026/09/29　進行中",
+    "資料同步　2026/09/22 15:48 · 數列至 9/1",
     "會員成長　+374",
     "檢視區間　" + rangeText(),
     "",
