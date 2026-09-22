@@ -45,6 +45,8 @@ const OTHER_DIMS = [
   { key: "product", label: "產品種類", where: "登錄" }
 ];
 const DIMS = SERIES_DIMS.concat(OTHER_DIMS);
+const SNAPSHOT_KEYS = new Set(["gender", "channel", "product"]);
+function isSnapshotDim(key) { return SNAPSHOT_KEYS.has(key); }
 /** 人氣指標：區間合計分組長條（各檔一根），不用曲線。發票／罐數維持曲線。 */
 const PEOPLE_BAR_KEYS = new Set(["visits", "binds"]);
 const CURVE_KEYS = new Set(["invoices", "cans"]);
@@ -667,9 +669,10 @@ function renderGender(picks) {
   const dimLabel = "男女比";
   const cols = Math.min(3, Math.max(1, picks.length));
   document.getElementById("resultsBody").innerHTML =
+    '<div class="toolbar"><div class="hint"><b>活動全程快照</b>　男女比為 CRM 消費者檔案全程統計，不受活動區間篩選影響。</div></div>' +
     '<div class="mini-grid cols-' + cols + '">' +
     picks.map((p, i) => {
-      if (!p.gender) return emptyCard(p, dimLabel, key);
+      if (!p.gender) return emptyCard(p, dimLabel, "gender");
       return '<article class="mini">' +
         '<div class="mini-h"><h3><i class="swatch" style="background:' + p.color + '"></i>' + p.short +
         (p.fake ? ' <span class="fake-pill">示意</span>' : "") + "</h3>" +
@@ -725,6 +728,7 @@ function renderGender(picks) {
 function renderBars(picks, key, dimLabel) {
   const cols = Math.min(3, Math.max(1, picks.length));
   document.getElementById("resultsBody").innerHTML =
+    '<div class="toolbar"><div class="hint"><b>活動全程快照</b>　' + dimLabel + '為 CRM 登錄活動全程統計，不受活動區間篩選影響。</div></div>' +
     '<div class="mini-grid cols-' + cols + '">' +
     picks.map((p, i) => {
       const v = p[key];
@@ -783,10 +787,17 @@ function render() {
   const dim = DIMS.find(d => d.key === state.dim);
   const isPeople = PEOPLE_BAR_KEYS.has(state.dim);
   const isCurve = CURVE_KEYS.has(state.dim);
+  const isSnapshot = isSnapshotDim(state.dim);
   const isSeries = isPeople || isCurve;
+  if (isSnapshot) {
+    // Snapshot dimensions are campaign-total CRM data; never carry a time range into them.
+    state.rangeFrom = 1;
+    state.rangeTo = null;
+  }
   let sub;
   if (isPeople) sub = " · 區間合計長條比較";
   else if (isCurve) sub = " · 活動第 N " + (state.grain === "week" ? "週" : "天");
+  else if (isSnapshot) sub = " · 活動全程快照（不受區間影響）";
   else sub = " · 各檔小倍數";
   document.getElementById("resultsTitle").innerHTML = dim.label + '<span class="sub">' + dim.where + sub + "</span>";
   const picks = selectedProjects();
@@ -799,6 +810,6 @@ function render() {
   else if (isCurve) renderSeries(picks, dim);
   else if (state.dim === "gender") renderGender(picks);
   else if (state.dim === "channel") renderBars(picks, "channel", "通路");
-  else renderBars(picks, "product", "產品種類");
+  else if (state.dim === "product") renderBars(picks, "product", "產品種類");
 }
 render();
