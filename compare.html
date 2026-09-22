@@ -207,6 +207,25 @@ a { color: inherit; text-decoration: none; }
 .page { gap: 16px; }
 
   .page-note{margin-top:6px;font-size:13px;color:var(--muted);font-weight:400;max-width:52em;line-height:1.55}
+
+
+
+.range-panel{margin:12px 0 8px;padding:12px 14px;background:#F7F3EE;border:1px solid #E8DFD6;border-radius:12px}
+.range-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.range-title{font-size:12px;font-weight:700;color:#1C1C1C}
+.range-readout{font-size:12px;color:#6F6A64;flex:1}
+.range-readout b{color:#007A49;font-weight:700}
+.range-reset{height:28px;padding:0 10px;border:1px solid #D9D0C6;border-radius:8px;background:#fff;font-size:12px;font-weight:600;color:#6F6A64;cursor:pointer}
+.range-reset:hover{border-color:#007A49;color:#007A49}
+.range-slider{position:relative;height:28px;margin:0 2px}
+.range-track{position:absolute;left:0;right:0;top:50%;height:6px;margin-top:-3px;background:#E0D7CE;border-radius:99px;overflow:hidden}
+.range-fill{position:absolute;top:0;height:100%;background:#007A49;border-radius:99px}
+.range-slider input[type=range]{position:absolute;left:0;width:100%;top:50%;margin:0;transform:translateY(-50%);-webkit-appearance:none;appearance:none;background:transparent;pointer-events:none;height:28px;z-index:2}
+.range-slider input[type=range]::-webkit-slider-runnable-track{height:6px;background:transparent}
+.range-slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;pointer-events:auto;width:18px;height:18px;margin-top:-6px;border-radius:50%;background:#fff;border:2px solid #007A49;box-shadow:0 1px 3px rgba(0,0,0,.18);cursor:pointer;position:relative;z-index:3}
+.range-slider input[type=range]::-moz-range-track{height:6px;background:transparent;border:0}
+.range-slider input[type=range]::-moz-range-thumb{pointer-events:auto;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid #007A49;box-shadow:0 1px 3px rgba(0,0,0,.18);cursor:pointer}
+.range-ends{display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:#9A948C}
 </style>
 </head>
 <body>
@@ -274,6 +293,6 @@ a { color: inherit; text-decoration: none; }
     </main>
   </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
-<script src="compare.js?v=20260922-series4"></script>
+<script src="compare.js?v=20260922-dayrange2"></script>
 </body>
 </html>

@@ -48,6 +48,30 @@ function seriesOf(p, key) {
   return v;
 }
 
+function maxSeriesLen(picks, key, grain) {
+  let m = 0;
+  picks.forEach(p => {
+    const s = seriesOf(p, key);
+    if (!s) return;
+    const arr = grain === "day" ? s.daily : s.weekly;
+    if (arr) m = Math.max(m, arr.length);
+  });
+  return m;
+}
+function clampRange(maxN) {
+  if (!maxN) { state.rangeFrom = 1; state.rangeTo = 1; return; }
+  let from = state.rangeFrom || 1;
+  let to = state.rangeTo == null ? maxN : state.rangeTo;
+  from = Math.max(1, Math.min(from, maxN));
+  to = Math.max(1, Math.min(to, maxN));
+  if (from > to) { const t = from; from = to; to = t; }
+  state.rangeFrom = from;
+  state.rangeTo = to;
+}
+function sliceSeries(arr, from, to) {
+  return arr.slice(from - 1, to);
+}
+
 const PROJECTS = [
   {
     id: "p0050",
@@ -117,7 +141,7 @@ const PROJECTS = [
   }
 ];
 
-const state = { selected: new Set(PROJECTS.map(p => p.id)), dim: "visits", grain: "day" };
+const state = { selected: new Set(PROJECTS.map(p => p.id)), dim: "visits", grain: "day", rangeFrom: 1, rangeTo: null };
 const charts = [];
 function killCharts() {
   while (charts.length) {
@@ -168,7 +192,7 @@ function renderPicks() {
     '<button type="button" class="chip' + (d.key === state.dim ? " on" : "") + '" data-dim="' + d.key + '" role="tab" aria-selected="' + (d.key === state.dim) + '">' + d.label + "</button>"
   ).join("");
   document.getElementById("dimPicks").querySelectorAll(".chip").forEach(btn => {
-    btn.addEventListener("click", () => { state.dim = btn.dataset.dim; render(); });
+    btn.addEventListener("click", () => { state.dim = btn.dataset.dim; state.rangeFrom = 1; state.rangeTo = null; render(); });
   });
 }
 function emptyCard(p, dimLabel, key) {
@@ -197,10 +221,14 @@ function renderSeries(picks, dim) {
   const withData = picks.filter(p => seriesOf(p, key));
   const missing = picks.filter(p => !seriesOf(p, key));
   const grain = state.grain;
-  const series = withData.map(p => grain === "day" ? p[key].daily : p[key].weekly);
-  const maxN = series.reduce((m, s) => Math.max(m, s.length), 0);
-  const labels = Array.from({ length: maxN }, (_, i) => String(i + 1));
+  const maxN = maxSeriesLen(withData, key, grain);
+  if (state.rangeTo == null || state.rangeTo > maxN) state.rangeTo = maxN || 1;
+  clampRange(maxN || 1);
+  const from = state.rangeFrom;
+  const to = state.rangeTo;
+  const unitWord = grain === "day" ? "天" : "週";
   const axis = grain === "day" ? "活動第 N 天" : "活動第 N 週";
+  const labels = Array.from({ length: Math.max(0, to - from + 1) }, (_, i) => String(from + i));
   const legend = withData.map(p =>
     "<span><i style=\"background:" + p.color + "\"></i>" + p.short + (p.fake ? " · 示意" : "") + "</span>"
   ).join("");
@@ -214,16 +242,37 @@ function renderSeries(picks, dim) {
       '<button type="button" data-grain="day"' + (grain === "day" ? ' class="on"' : "") + ">日</button>" +
       '<button type="button" data-grain="week"' + (grain === "week" ? ' class="on"' : "") + ">週</button>" +
     "</div></div>";
+
+  if (withData.length && maxN) {
+    html += '<div class="range-panel" aria-label="活動區間">' +
+      '<div class="range-head">' +
+        '<span class="range-title">活動區間</span>' +
+        '<span class="range-readout" id="rangeReadout">第 <b>' + from + "</b>–<b>" + to + "</b> " + unitWord +
+        "（共 " + (to - from + 1) + " " + unitWord + "）</span>" +
+        '<button type="button" class="range-reset" id="rangeReset">全部</button>' +
+      "</div>" +
+      '<div class="range-slider" data-max="' + maxN + '">' +
+        '<div class="range-track"><div class="range-fill" id="rangeFill"></div></div>' +
+        '<input type="range" id="rangeFrom" min="1" max="' + maxN + '" value="' + from + '" aria-label="起始' + unitWord + '">' +
+        '<input type="range" id="rangeTo" min="1" max="' + maxN + '" value="' + to + '" aria-label="結束' + unitWord + '">' +
+      "</div>" +
+      '<div class="range-ends"><span>第 1 ' + unitWord + '</span><span>第 ' + maxN + ' ' + unitWord + '</span></div>' +
+    "</div>";
+  }
+
   if (withData.length) {
     html += '<div class="chart-wrap"><canvas id="cmpLine"></canvas></div>';
     html += '<div class="chart-foot"><div class="sums">' +
       withData.map(p => {
-        const arr = grain === "day" ? p[key].daily : p[key].weekly;
+        const full = grain === "day" ? p[key].daily : p[key].weekly;
+        const arr = sliceSeries(full, from, to);
         const metric = (p[key].label || dimLabel);
+        const shown = arr.length ? arr.reduce((a, b) => a + b, 0) : 0;
         return '<span class="sum-item"><i style="background:' + p.color + '"></i>' + p.short +
-          " · " + metric + " 合計 <strong>" + fmt(arr.reduce((a, b) => a + b, 0)) + "</strong> " + p[key].unit + "</span>";
+          " · " + metric + "（區間）<strong>" + fmt(shown) + "</strong> " + p[key].unit +
+          (full.length < from ? " · 此檔期較短" : "") + "</span>";
       }).join("") +
-      '</div><p class="axis-note">橫軸是' + axis + "，因檔期長度不同（17 vs 45 vs 77 天）。" +
+      '</div><p class="axis-note">橫軸是' + axis + "，以各檔活動第 1 " + unitWord + "為起點對齊；檔期較短的專案在超出天數處無點。" +
       (grain === "week" ? "週切：0050／傑憲每 7 日；WBC 為結案五波週報。" : "") +
       "</p></div>";
   }
@@ -233,19 +282,84 @@ function renderSeries(picks, dim) {
   }
   document.getElementById("resultsBody").innerHTML = html;
   document.querySelectorAll("#resultsBody [data-grain]").forEach(btn => {
-    btn.addEventListener("click", () => { state.grain = btn.dataset.grain; render(); });
+    btn.addEventListener("click", () => {
+      state.grain = btn.dataset.grain;
+      state.rangeFrom = 1;
+      state.rangeTo = null;
+      render();
+    });
   });
+  const fromEl = document.getElementById("rangeFrom");
+  const toEl = document.getElementById("rangeTo");
+  const fillEl = document.getElementById("rangeFill");
+  const readout = document.getElementById("rangeReadout");
+  function paintRangeUI() {
+    if (!fromEl || !toEl) return;
+    const max = Number(fromEl.max);
+    let a = Number(fromEl.value), b = Number(toEl.value);
+    if (a > b) { const t = a; a = b; b = t; }
+    const left = ((a - 1) / Math.max(1, max - 1)) * 100;
+    const right = ((b - 1) / Math.max(1, max - 1)) * 100;
+    if (fillEl) {
+      fillEl.style.left = left + "%";
+      fillEl.style.width = Math.max(0, right - left) + "%";
+    }
+    if (readout) {
+      readout.innerHTML = "第 <b>" + a + "</b>–<b>" + b + "</b> " + unitWord +
+        "（共 " + (b - a + 1) + " " + unitWord + "）";
+    }
+  }
+  function onRangeInput(which) {
+    let a = Number(fromEl.value), b = Number(toEl.value);
+    if (which === "from" && a > b) a = b;
+    if (which === "to" && b < a) b = a;
+    fromEl.value = a;
+    toEl.value = b;
+    state.rangeFrom = a;
+    state.rangeTo = b;
+    paintRangeUI();
+  }
+  function commitRange() {
+    state.rangeFrom = Math.min(Number(fromEl.value), Number(toEl.value));
+    state.rangeTo = Math.max(Number(fromEl.value), Number(toEl.value));
+    render();
+  }
+  if (fromEl && toEl) {
+    paintRangeUI();
+    fromEl.addEventListener("input", () => onRangeInput("from"));
+    toEl.addEventListener("input", () => onRangeInput("to"));
+    fromEl.addEventListener("change", commitRange);
+    toEl.addEventListener("change", commitRange);
+  }
+  const resetBtn = document.getElementById("rangeReset");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      state.rangeFrom = 1;
+      state.rangeTo = null;
+      render();
+    });
+  }
   if (!withData.length) return;
-  const pointR = maxN > 20 ? 2.5 : 4;
+  const pointR = labels.length > 20 ? 2.5 : 4;
   const yUnit = dim.yUnit || (withData[0][key].unit);
   charts.push(new Chart(document.getElementById("cmpLine"), {
     type: "line",
     data: {
       labels,
       datasets: withData.map(p => {
-        const data = grain === "day" ? p[key].daily : p[key].weekly;
+        const full = grain === "day" ? p[key].daily : p[key].weekly;
+        const data = sliceSeries(full, from, to).map((v, i) => {
+          const dayIndex = from + i; // 1-based absolute
+          return dayIndex <= full.length ? v : null;
+        });
+        // If campaign shorter than from, all null; if partial, sliceSeries already truncated —
+        // pad with nulls to align labels when campaign ends before `to`
+        const padded = [];
+        for (let d = from; d <= to; d++) {
+          padded.push(d <= full.length ? full[d - 1] : null);
+        }
         return {
-          label: p.short, data, unit: p[key].unit,
+          label: p.short, data: padded, unit: p[key].unit,
           borderColor: p.color, backgroundColor: lineFill(p.color),
           fill: true, tension: 0.25, borderWidth: 2.2,
           pointRadius: pointR, pointHoverRadius: 6,
@@ -264,6 +378,7 @@ function renderSeries(picks, dim) {
           titleFont: { family: "Noto Sans TC", size: 12 },
           bodyFont: { family: "Noto Sans TC", size: 13, weight: "600" },
           padding: 10,
+          filter: (x) => x.raw != null,
           callbacks: {
             title: (items) => axis.replace("N", items[0].label),
             label: (x) => " " + x.dataset.label + "  " + fmt(x.raw) + " " + x.dataset.unit
@@ -287,6 +402,7 @@ function renderSeries(picks, dim) {
     }
   }));
 }
+
 
 function renderGender(picks) {
   const dimLabel = "男女比";
