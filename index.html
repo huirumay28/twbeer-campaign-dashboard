@@ -260,6 +260,23 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 .range-ends { display: flex; justify-content: space-between; margin-top: 2px; font-size: 11px; color: var(--faint); }
 
 
+
+/* 活動資訊／主題 */
+.theme-panel .card-b { padding: 20px 24px 22px; }
+.theme-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
+}
+@media (max-width: 1100px) { .theme-grid { grid-template-columns: 1fr; } }
+.theme-field {
+  padding: 12px 14px; border-radius: 8px; background: #F7F3EE;
+  border: 1px solid #E8DFD6;
+}
+.theme-field.span2 { grid-column: 1 / -1; }
+.theme-k { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+.theme-v { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.55; white-space: pre-wrap; }
+.theme-v.empty { color: var(--faint); font-weight: 400; }
+.theme-v .sub { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); font-weight: 400; }
+
 </style>
 </head>
 <body>
@@ -292,6 +309,7 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
     </header>
     <div class="crumbs">專案管理 / <a href="projects.html">專案成效分析</a> / <b>買台啤抽元大 0050</b></div>
     <nav class="chipbar" id="chipbar" aria-label="區塊導覽">
+      <button class="chip" type="button" data-jump="theme">活動資訊</button>
       <button class="chip on" type="button" data-jump="daily">專案成效總覽</button>
       <button class="chip" type="button" data-jump="consumer">消費者</button>
       <button class="chip" type="button" data-jump="login">登錄</button>
@@ -319,6 +337,32 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
             <a class="btn" href="projects.html">返回專案列表</a>
             <button class="btn primary" type="button" id="reportBtn">下載結案報告</button>
           </div>
+        </div>
+      </section>
+      <section class="card section theme-panel" id="theme">
+        <div class="card-h">
+          <h2>活動資訊／主題<span class="sub">主題 · 起迄 · 獎品 · 宣傳素材</span></h2>
+        </div>
+        <div class="card-b">
+          <div class="theme-grid">
+            <div class="theme-field span2">
+              <div class="theme-k">主題／活動在做什麼</div>
+              <div class="theme-v">台啤 AI 鏈鏈看 · LINE 登錄發票／罐數＋小遊戲；買台啤後抽元大 0050 等值現金。<span class="sub">機制見成效頁路徑：開始遊戲 → 登錄發票（掃描／手動／載具）→ 裝備組合解鎖／抽獎。</span></div>
+            </div>
+            <div class="theme-field">
+              <div class="theme-k">明確起迄日期</div>
+              <div class="theme-v">2026/08/19–2026/09/29<span class="sub">進行中（成效頁活動期間）</span></div>
+            </div>
+            <div class="theme-field">
+              <div class="theme-k">獎品有哪些</div>
+              <div class="theme-v">元大 0050 等值現金<span class="sub">僅活動名稱可核對；細項／名額待補</span></div>
+            </div>
+            <div class="theme-field span2">
+              <div class="theme-k">搭配的宣傳素材有哪些</div>
+              <div class="theme-v empty">—</div>
+            </div>
+          </div>
+          
         </div>
       </section>
       <section class="card section" id="daily">
@@ -1028,7 +1072,7 @@ function bindNav() {
       if (e.isIntersecting) chips.forEach(c => c.classList.toggle("on", c.dataset.jump === e.target.id));
     });
   }, { rootMargin: "-20% 0px -60% 0px", threshold: 0.1 });
-  ["daily","consumer","login","amount","game"].forEach(id => io.observe(document.getElementById(id)));
+  ["theme","daily","consumer","login","amount","game"].forEach(id => io.observe(document.getElementById(id)));
 }
 
 function buildReport() {

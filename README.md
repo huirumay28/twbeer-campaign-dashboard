@@ -46,7 +46,7 @@ python3 -m http.server 8080
 | `index.html` | 買台啤抽元大 0050 成效 | https://huirumay28.github.io/twbeer-campaign-dashboard/ |
 | `jiexian.html` | 真假傑憲大挑戰 成效 | https://huirumay28.github.io/twbeer-campaign-dashboard/jiexian.html |
 | `tokyo.html` | 東京機票 成效 | https://huirumay28.github.io/twbeer-campaign-dashboard/tokyo.html |
-| `recap.html` | 專案主題總覽（三檔主題／檔期／獎品／素材） | https://huirumay28.github.io/twbeer-campaign-dashboard/recap.html |
+| `recap.html` | 主題總覽捷徑（對照表；主內容在各成效頁「活動資訊／主題」與 projects 摘要列） | https://huirumay28.github.io/twbeer-campaign-dashboard/recap.html |
 | `compare.html` | 比較專案 | https://huirumay28.github.io/twbeer-campaign-dashboard/compare.html |
 
 `campaign.png` / `jiexian.png` / `tokyo.png` 是各專案 KV，主頁用不到。

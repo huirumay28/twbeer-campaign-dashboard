@@ -256,6 +256,23 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
 .chart-wrap .empty { position: absolute; inset: 0; min-height: 0; background: #fff; }
 [hidden] { display: none !important; }
 
+
+/* 活動資訊／主題 */
+.theme-panel .card-b { padding: 20px 24px 22px; }
+.theme-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
+}
+@media (max-width: 1100px) { .theme-grid { grid-template-columns: 1fr; } }
+.theme-field {
+  padding: 12px 14px; border-radius: 8px; background: #F7F3EE;
+  border: 1px solid #E8DFD6;
+}
+.theme-field.span2 { grid-column: 1 / -1; }
+.theme-k { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+.theme-v { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.55; white-space: pre-wrap; }
+.theme-v.empty { color: var(--faint); font-weight: 400; }
+.theme-v .sub { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); font-weight: 400; }
+
   </style>
 </head>
 <body>
@@ -288,6 +305,7 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
     </header>
     <div class="crumbs">專案管理 / <a href="projects.html">專案成效分析</a> / <b>喝台啤抽東京雙人來回機票</b></div>
     <nav class="chipbar" id="chipbar" aria-label="區塊導覽">
+      <button class="chip" type="button" data-jump="theme">活動資訊</button>
       <button class="chip on" type="button" data-jump="daily">專案成效總覽</button>
       <button class="chip" type="button" data-jump="consumer">消費者</button>
       <button class="chip" type="button" data-jump="login">登錄</button>
@@ -318,6 +336,32 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
             <button class="btn" type="button" disabled>同步活動資料</button>
             <button class="btn primary" type="button" id="reportBtn">下載專案完整報表</button>
           </div>
+        </div>
+      </section>
+      <section class="card section theme-panel" id="theme">
+        <div class="card-h">
+          <h2>活動資訊／主題<span class="sub">主題 · 起迄 · 獎品 · 宣傳素材</span></h2>
+        </div>
+        <div class="card-b">
+          <div class="theme-grid">
+            <div class="theme-field span2">
+              <div class="theme-k">主題／活動在做什麼</div>
+              <div class="theme-v">登錄發票抽卡／集卡（台灣隊長卡），週週抽；核心為發票活動＋東京機票主題。<span class="sub">結案：有效發票＝抽卡次數；另有卡片發送與持有分佈。</span></div>
+            </div>
+            <div class="theme-field">
+              <div class="theme-k">明確起迄日期</div>
+              <div class="theme-v">2026/01/14–2026/03/31（77 天）<span class="sub">已結束 · tokyo_brief p-09／p-11</span></div>
+            </div>
+            <div class="theme-field">
+              <div class="theme-k">獎品有哪些</div>
+              <div class="theme-v">東京雙人來回機票（14 張全套｜10 名）、陳傑憲親簽實體卡（13 張｜15 名）、最強應援套組（12 張｜50 名）等階梯獎項<span class="sub">獎項表見 tokyo_brief p-11「全獎項規劃」；細項以結案為準</span></div>
+            </div>
+            <div class="theme-field span2">
+              <div class="theme-k">搭配的宣傳素材有哪些</div>
+              <div class="theme-v empty">—</div>
+            </div>
+          </div>
+          
         </div>
       </section>
       <section class="card section" id="daily">
@@ -978,7 +1022,7 @@ function bindNav() {
       if (e.isIntersecting) chips.forEach(c => c.classList.toggle("on", c.dataset.jump === e.target.id));
     });
   }, { rootMargin: "-20% 0px -60% 0px", threshold: 0.1 });
-  ["daily","consumer","login","amount","game"].forEach(id => io.observe(document.getElementById(id)));
+  ["theme","daily","consumer","login","amount","game"].forEach(id => io.observe(document.getElementById(id)));
 }
 function printReport() {
   const text = buildReport();
