@@ -45,6 +45,9 @@ const OTHER_DIMS = [
   { key: "product", label: "產品種類", where: "登錄" }
 ];
 const DIMS = SERIES_DIMS.concat(OTHER_DIMS);
+/** 人氣指標：區間合計分組長條（各檔一根），不用曲線。發票／罐數維持曲線。 */
+const PEOPLE_BAR_KEYS = new Set(["visits", "binds"]);
+const CURVE_KEYS = new Set(["invoices", "cans"]);
 
 function hasDaily(s) { return !!(s && s.daily && s.daily.length); }
 function hasWeekly(s) { return !!(s && s.weekly && s.weekly.length); }
@@ -109,6 +112,8 @@ const PROJECTS = [
         { label: "未揭露", n: 151, pct: 13.1, color: "#E0B34E" }
       ]
     },
+    /* 0050 通路（category bars）— CRM 尚未提供 labels+values；勿捏造數字。
+       就緒時改成：channel: { labels: ["7-ELEVEN", ...], data: [n, ...], unit: "筆" } */
     channel: null,
     product: { labels: ["金牌","金牌 ONE","經典","雲泡","爽啤","18天","其他"], data: [55297,12325,9917,2311,2270,2147,830], unit: "罐" }
   },
@@ -227,6 +232,275 @@ function emptyCard(p, dimLabel, key, reason) {
     '<span class="status ' + p.statusKind + '">' + p.status + "</span></div>" +
     '<div class="empty"><div>' + title + "</div><small>" + note + "</small></div></article>";
 }
+/**
+ * 進站／綁定圖表決策（2026-09-22）：
+ * 「用長條圖比較」→ 各檔一根長條 = 選定活動區間加總（或全檔合計）。
+ * 理由：0050 有日／週數列、WBC／傑憲常只有合計或週報，時間序列對不齊；
+ * 區間合計最利於跨檔比人數。有數列者依 range slider 加總；僅有合計者僅在
+ * 「全部」區間顯示合計，局部區間則留空並註記。發票／罐數仍用曲線。
+ */
+function isFullRange(from, to, maxN) {
+  return !maxN || (from === 1 && to === maxN);
+}
+function peopleRangeValue(p, key, grain, from, to, maxN) {
+  const s = seriesOf(p, key);
+  const arr = grainArr(s, grain);
+  if (arr && arr.length) {
+    const sliced = sliceSeries(arr, from, Math.min(to, arr.length));
+    if (from > arr.length) return { kind: "short", value: null };
+    return { kind: "series", value: sliced.reduce((a, b) => a + b, 0), unit: s.unit, metric: s.label };
+  }
+  const total = key === "visits" ? p.visitsTotal : (key === "binds" ? p.bindsTotal : null);
+  if (total != null) {
+    if (isFullRange(from, to, maxN)) {
+      return { kind: "total", value: total, unit: "人", metric: null };
+    }
+    return { kind: "partial-total", value: null, unit: "人", total };
+  }
+  return { kind: "missing", value: null };
+}
+const peopleBarLabelPlugin = {
+  id: "peopleBarLabel",
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    const meta = chart.getDatasetMeta(0);
+    ctx.save();
+    ctx.fillStyle = "#1C1C1C";
+    ctx.font = "700 12px Noto Sans TC";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    meta.data.forEach((bar, i) => {
+      const v = chart.data.datasets[0].data[i];
+      if (v == null) return;
+      ctx.fillText(fmt(v), bar.x, bar.y - 6);
+    });
+    ctx.restore();
+  }
+};
+
+function bindRangeControls(unitWord) {
+  const fromEl = document.getElementById("rangeFrom");
+  const toEl = document.getElementById("rangeTo");
+  const fillEl = document.getElementById("rangeFill");
+  const readout = document.getElementById("rangeReadout");
+  function paintRangeUI() {
+    if (!fromEl || !toEl) return;
+    const max = Number(fromEl.max);
+    let a = Number(fromEl.value), b = Number(toEl.value);
+    if (a > b) { const t = a; a = b; b = t; }
+    const left = ((a - 1) / Math.max(1, max - 1)) * 100;
+    const right = ((b - 1) / Math.max(1, max - 1)) * 100;
+    if (fillEl) {
+      fillEl.style.left = left + "%";
+      fillEl.style.width = Math.max(0, right - left) + "%";
+    }
+    if (readout) {
+      readout.innerHTML = "第 <b>" + a + "</b>–<b>" + b + "</b> " + unitWord +
+        "（共 " + (b - a + 1) + " " + unitWord + "）";
+    }
+  }
+  function onRangeInput(which) {
+    let a = Number(fromEl.value), b = Number(toEl.value);
+    if (which === "from" && a > b) a = b;
+    if (which === "to" && b < a) b = a;
+    fromEl.value = a;
+    toEl.value = b;
+    state.rangeFrom = a;
+    state.rangeTo = b;
+    paintRangeUI();
+  }
+  function commitRange() {
+    state.rangeFrom = Math.min(Number(fromEl.value), Number(toEl.value));
+    state.rangeTo = Math.max(Number(fromEl.value), Number(toEl.value));
+    render();
+  }
+  if (fromEl && toEl) {
+    paintRangeUI();
+    fromEl.addEventListener("input", () => onRangeInput("from"));
+    toEl.addEventListener("input", () => onRangeInput("to"));
+    fromEl.addEventListener("change", commitRange);
+    toEl.addEventListener("change", commitRange);
+  }
+  const resetBtn = document.getElementById("rangeReset");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      state.rangeFrom = 1;
+      state.rangeTo = null;
+      render();
+    });
+  }
+}
+
+function renderPeopleBars(picks, dim) {
+  const key = dim.key;
+  const dimLabel = dim.label;
+  const withAny = picks.filter(p => seriesOf(p, key) || (key === "visits" && p.visitsTotal) || (key === "binds" && p.bindsTotal));
+  const weeklyOnly = withAny.filter(p => {
+    const s = p[key];
+    return s && hasWeekly(s) && !hasDaily(s);
+  });
+  const onlyWeeklyAvail = withAny.some(p => seriesOf(p, key)) &&
+    withAny.filter(p => seriesOf(p, key)).every(p => !hasDaily(p[key]));
+  if (onlyWeeklyAvail) state.grain = "week";
+  else if (state.autoGrain && weeklyOnly.length) state.grain = "week";
+  state.autoGrain = false;
+  const grain = state.grain;
+  const withSeries = picks.filter(p => grainArr(seriesOf(p, key), grain));
+  const maxN = maxSeriesLen(withSeries, key, grain);
+  if (maxN) {
+    if (state.rangeTo == null || state.rangeTo > maxN) state.rangeTo = maxN;
+    clampRange(maxN);
+  } else {
+    state.rangeFrom = 1;
+    state.rangeTo = 1;
+  }
+  const from = state.rangeFrom;
+  const to = maxN ? state.rangeTo : 1;
+  const unitWord = grain === "day" ? "天" : "週";
+  const full = isFullRange(from, to, maxN);
+  const values = picks.map(p => peopleRangeValue(p, key, grain, from, to, maxN));
+  const chartable = picks.filter((_, i) => values[i].value != null);
+  const missing = picks.filter((_, i) => values[i].value == null);
+
+  const legend = picks.map(p =>
+    "<span><i style=\"background:" + p.color + "\"></i>" + p.short + (p.fake ? " · 示意" : "") + "</span>"
+  ).join("");
+  let html = '<div class="toolbar">' +
+    '<div class="hint"><b>比較說明</b>　各檔一根長條＝選定活動區間「' + dimLabel + '」加總' +
+    (full ? "（目前為全部區間）" : "（第 " + from + "–" + to + " " + unitWord + "）") +
+    '。僅有合計、無數列的檔案只在「全部」時顯示合計。' +
+    (legend ? '<div class="legend-row" style="margin-top:8px">' + legend + "</div>" : "") +
+    "</div>";
+  if (withSeries.length) {
+    html += '<div class="seg" role="tablist" aria-label="粒度">' +
+      '<button type="button" data-grain="day"' + (grain === "day" ? ' class="on"' : "") + ">日</button>" +
+      '<button type="button" data-grain="week"' + (grain === "week" ? ' class="on"' : "") + ">週</button>" +
+    "</div>";
+  }
+  html += "</div>";
+
+  if (withSeries.length && maxN) {
+    html += '<div class="range-panel" aria-label="活動區間">' +
+      '<div class="range-head">' +
+        '<span class="range-title">活動區間（加總範圍）</span>' +
+        '<span class="range-readout" id="rangeReadout">第 <b>' + from + "</b>–<b>" + to + "</b> " + unitWord +
+        "（共 " + (to - from + 1) + " " + unitWord + "）</span>" +
+        '<button type="button" class="range-reset" id="rangeReset">全部</button>' +
+      "</div>" +
+      '<div class="range-slider" data-max="' + maxN + '">' +
+        '<div class="range-track"><div class="range-fill" id="rangeFill"></div></div>' +
+        '<input type="range" id="rangeFrom" min="1" max="' + maxN + '" value="' + from + '" aria-label="起始' + unitWord + '">' +
+        '<input type="range" id="rangeTo" min="1" max="' + maxN + '" value="' + to + '" aria-label="結束' + unitWord + '">' +
+      "</div>" +
+      '<div class="range-ends"><span>第 1 ' + unitWord + '</span><span>第 ' + maxN + ' ' + unitWord + '</span></div>' +
+    "</div>";
+  }
+
+  if (chartable.length) {
+    html += '<div class="chart-wrap"><canvas id="cmpPeopleBars"></canvas></div>';
+    html += '<div class="chart-foot"><div class="sums">' +
+      chartable.map(p => {
+        const i = picks.indexOf(p);
+        const info = values[i];
+        const metric = info.metric || dimLabel;
+        const tag = info.kind === "total" ? "全程合計" : "區間加總";
+        return '<span class="sum-item"><i style="background:' + p.color + '"></i>' + p.short +
+          " · " + metric + "（" + tag + "）<strong>" + fmt(info.value) + "</strong> " + (info.unit || "人") + "</span>";
+      }).join("") +
+      '</div><p class="axis-note">橫軸為專案；長條高度＝選定區間人數加總（非整條時間曲線）。' +
+      (grain === "week" && withSeries.length ? "週切：有日數列者每 7 日一桶；WBC 綁定為結案五波週報。" : "") +
+      "</p></div>";
+  }
+
+  if (missing.length) {
+    html += '<div class="mini-grid cols-' + Math.min(3, missing.length) + '" style="margin-top:16px">' +
+      missing.map(p => {
+        const i = picks.indexOf(p);
+        const info = values[i];
+        if (info.kind === "partial-total") {
+          return '<article class="mini">' +
+            '<div class="mini-h"><h3><i class="swatch" style="background:' + p.color + '"></i>' + p.short + "</h3>" +
+            '<span class="status ' + p.statusKind + '">' + p.status + "</span></div>" +
+            '<div class="empty"><div>僅有全程合計</div><small>結案合計 ' + fmt(info.total) +
+            " 人，無日／週數列可切區間。請按「全部」才顯示長條。</small></div></article>";
+        }
+        if (info.kind === "short") {
+          return '<article class="mini">' +
+            '<div class="mini-h"><h3><i class="swatch" style="background:' + p.color + '"></i>' + p.short + "</h3>" +
+            '<span class="status ' + p.statusKind + '">' + p.status + "</span></div>" +
+            '<div class="empty"><div>檔期較短</div><small>此檔活動' + unitWord + "數少於選定起始，區間內無資料。</small></div></article>";
+        }
+        const reason = (grain === "day" && p[key] && hasWeekly(p[key]) && !hasDaily(p[key])) ? "weekly-only" : "";
+        return emptyCard(p, dimLabel, key, reason);
+      }).join("") + "</div>";
+  }
+
+  if (!chartable.length && !missing.length) {
+    html += '<div class="empty page-empty"><div>無可比較數據</div><small>所選專案皆無「' + dimLabel + '」。</small></div>';
+  }
+
+  document.getElementById("resultsBody").innerHTML = html;
+  document.querySelectorAll("#resultsBody [data-grain]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.grain = btn.dataset.grain;
+      state.rangeFrom = 1;
+      state.rangeTo = null;
+      render();
+    });
+  });
+  bindRangeControls(unitWord);
+  if (!chartable.length) return;
+
+  const yUnit = dim.yUnit || "人";
+  charts.push(new Chart(document.getElementById("cmpPeopleBars"), {
+    type: "bar",
+    data: {
+      labels: chartable.map(p => p.short),
+      datasets: [{
+        label: dimLabel,
+        data: chartable.map(p => values[picks.indexOf(p)].value),
+        backgroundColor: chartable.map(p => p.color),
+        borderRadius: 6,
+        borderSkipped: false,
+        barPercentage: 0.55,
+        categoryPercentage: 0.7,
+        unit: yUnit
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#1C1C1C",
+          titleFont: { family: "Noto Sans TC", size: 12 },
+          bodyFont: { family: "Noto Sans TC", size: 13, weight: "600" },
+          padding: 10,
+          callbacks: {
+            title: (items) => items[0].label,
+            label: (x) => " " + dimLabel + "  " + fmt(x.raw) + " " + yUnit
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { family: "Noto Sans TC", size: 13, weight: "600" }, color: "#1C1C1C" },
+          border: { color: "#E4DBD2" },
+          title: { display: true, text: "專案", color: "#6F6A64", font: { family: "Noto Sans TC", size: 11 } }
+        },
+        y: {
+          beginAtZero: true, grace: "18%",
+          ticks: { font: { family: "Noto Sans TC", size: 11 }, color: "#6F6A64", callback: v => fmt(v) },
+          grid: { color: "rgba(228,219,210,.9)" }, border: { display: false },
+          title: { display: true, text: yUnit, color: "#6F6A64", font: { family: "Noto Sans TC", size: 11 } }
+        }
+      }
+    },
+    plugins: [peopleBarLabelPlugin]
+  }));
+}
+
 function lineFill(hex) {
   return (c) => {
     const g = c.chart.ctx, area = c.chart.chartArea;
@@ -321,56 +595,7 @@ function renderSeries(picks, dim) {
       render();
     });
   });
-  const fromEl = document.getElementById("rangeFrom");
-  const toEl = document.getElementById("rangeTo");
-  const fillEl = document.getElementById("rangeFill");
-  const readout = document.getElementById("rangeReadout");
-  function paintRangeUI() {
-    if (!fromEl || !toEl) return;
-    const max = Number(fromEl.max);
-    let a = Number(fromEl.value), b = Number(toEl.value);
-    if (a > b) { const t = a; a = b; b = t; }
-    const left = ((a - 1) / Math.max(1, max - 1)) * 100;
-    const right = ((b - 1) / Math.max(1, max - 1)) * 100;
-    if (fillEl) {
-      fillEl.style.left = left + "%";
-      fillEl.style.width = Math.max(0, right - left) + "%";
-    }
-    if (readout) {
-      readout.innerHTML = "第 <b>" + a + "</b>–<b>" + b + "</b> " + unitWord +
-        "（共 " + (b - a + 1) + " " + unitWord + "）";
-    }
-  }
-  function onRangeInput(which) {
-    let a = Number(fromEl.value), b = Number(toEl.value);
-    if (which === "from" && a > b) a = b;
-    if (which === "to" && b < a) b = a;
-    fromEl.value = a;
-    toEl.value = b;
-    state.rangeFrom = a;
-    state.rangeTo = b;
-    paintRangeUI();
-  }
-  function commitRange() {
-    state.rangeFrom = Math.min(Number(fromEl.value), Number(toEl.value));
-    state.rangeTo = Math.max(Number(fromEl.value), Number(toEl.value));
-    render();
-  }
-  if (fromEl && toEl) {
-    paintRangeUI();
-    fromEl.addEventListener("input", () => onRangeInput("from"));
-    toEl.addEventListener("input", () => onRangeInput("to"));
-    fromEl.addEventListener("change", commitRange);
-    toEl.addEventListener("change", commitRange);
-  }
-  const resetBtn = document.getElementById("rangeReset");
-  if (resetBtn) {
-    resetBtn.addEventListener("click", () => {
-      state.rangeFrom = 1;
-      state.rangeTo = null;
-      render();
-    });
-  }
+  bindRangeControls(unitWord);
   if (!withData.length) return;
   const pointR = labels.length > 20 ? 2.5 : 4;
   const yUnit = dim.yUnit || (withData[0][key].unit);
@@ -548,16 +773,22 @@ function render() {
   killCharts();
   renderPicks();
   const dim = DIMS.find(d => d.key === state.dim);
-  const isSeries = SERIES_DIMS.some(d => d.key === state.dim);
-  document.getElementById("resultsTitle").innerHTML = dim.label + '<span class="sub">' + dim.where +
-    (isSeries ? (" · 活動第 N " + (state.grain === "week" ? "週" : "天")) : " · 各檔小倍數") + "</span>";
+  const isPeople = PEOPLE_BAR_KEYS.has(state.dim);
+  const isCurve = CURVE_KEYS.has(state.dim);
+  const isSeries = isPeople || isCurve;
+  let sub;
+  if (isPeople) sub = " · 區間合計長條比較";
+  else if (isCurve) sub = " · 活動第 N " + (state.grain === "week" ? "週" : "天");
+  else sub = " · 各檔小倍數";
+  document.getElementById("resultsTitle").innerHTML = dim.label + '<span class="sub">' + dim.where + sub + "</span>";
   const picks = selectedProjects();
   if (!picks.length) {
     document.getElementById("resultsBody").innerHTML =
       '<div class="empty page-empty"><div>請至少選擇一個專案</div><small>取消勾選後會立刻重繪；需保留至少一檔才能比較。</small></div>';
     return;
   }
-  if (isSeries) renderSeries(picks, dim);
+  if (isPeople) renderPeopleBars(picks, dim);
+  else if (isCurve) renderSeries(picks, dim);
   else if (state.dim === "gender") renderGender(picks);
   else if (state.dim === "channel") renderBars(picks, "channel", "通路");
   else renderBars(picks, "product", "產品種類");
