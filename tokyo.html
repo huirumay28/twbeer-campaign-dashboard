@@ -342,7 +342,7 @@ table.ga .pct { display: block; font-size: 11px; color: var(--muted); font-weigh
           <div class="kpi-row" id="kpiRow"></div>
 
           <div class="toolbar">
-            <p class="hint">目前數列：<b id="seriesName">有效發票登錄</b>　檢視 <b id="rangeHint">1/14 (三)–3/31 (二)</b></p>
+            <p class="hint">目前數列：<b id="seriesName">抽卡次數（有效發票登錄）</b>　檢視 <b id="rangeHint">1/14 (三)–3/31 (二)</b></p>
             <div class="seg" role="group" aria-label="時間粒度">
               <button type="button" data-grain="day">日</button>
               <button type="button" class="on" data-grain="week">週</button>
@@ -550,7 +550,7 @@ const canDaily = invDaily.map(n => n * 4);
 const KPIS = [
   { key: "visits", name: "不重複進站人數", total: 27148, unit: "人", cap: "結案合計 · 無週資料" },
   { key: "users", name: "不重複登錄人數", total: 1472, unit: "人", cap: "結案合計 · 無週資料" },
-  { key: "invoices", name: "有效發票登錄", total: 5478, unit: "筆", daily: invDaily, weekly: WEEK_INV },
+  { key: "invoices", name: "抽卡次數（有效發票登錄）", total: 5478, unit: "筆", daily: invDaily, weekly: WEEK_INV },
   { key: "cards", name: "卡片發送總數", total: 23129, unit: "張", daily: cardDaily, weekly: WEEK_CARDS },
   { key: "cans", name: "登錄總罐數", total: 21912, unit: "罐", daily: canDaily, weekly: WEEK_CANS, cap: "結案推估 5,478×4" }
 ];
@@ -593,7 +593,7 @@ const REPORT_FILE = "喝台啤抽東京雙人來回機票-專案完整報表.txt
 const state = { metric: "invoices", grain: "week", start: 0, end: 76, loginView: "product", sortKey: "clicks", sortDir: "desc", q: "" };
 function csvFor(id) {
   if (id === "daily") {
-    return toCsv(["日期","有效發票登錄(筆)","卡片發送(張)","登錄總罐數(罐)"],
+    return toCsv(["日期","抽卡次數／有效發票登錄(筆)","卡片發送(張)","登錄總罐數(罐)"],
       [["全程合計", 5478, 23129, 21912]].concat(DATES.map((_, i) => [DAYS[i], invDaily[i], cardDaily[i], canDaily[i]])));
   }
   if (id === "login") {

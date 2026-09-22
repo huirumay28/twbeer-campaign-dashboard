@@ -77,7 +77,8 @@ const PROJECTS = [
     color: "#298F66",
     days: 77,
     href: "tokyo.html",
-    logins: { daily: INV_TOKYO, weekly: WEEK_INV_TOKYO, unit: "筆" },
+    /* WBC：抽卡次數＝有效發票登錄次數（同一數列） */
+    logins: { daily: INV_TOKYO, weekly: WEEK_INV_TOKYO, unit: "次", label: "抽卡／發票登錄" },
     gender: null,
     channel: { labels: ["7-ELEVEN","全聯","全家","美聯社","萊爾富","其他"], data: [1612,1320,936,508,248,740], unit: "筆" },
     product: null
@@ -166,7 +167,7 @@ function renderLogins(picks) {
     "<span><i style=\"background:" + p.color + "\"></i>" + p.short + (p.fake ? " · 示意" : "") + "</span>"
   ).join("");
   let html = '<div class="toolbar">' +
-    '<div class="hint"><b>數列說明</b>　' + axis + " · 各檔自己的" + (grain === "day" ? "日" : "週") + "數列" +
+    '<div class="hint"><b>數列說明</b>　' + axis + " · 各檔自己的" + (grain === "day" ? "日" : "週") + "數列（WBC 的登錄次數＝抽卡次數＝有效發票登錄）" +
     (legend ? '<div class="legend-row" style="margin-top:8px">' + legend + "</div>" : "") +
     "</div>" +
     '<div class="seg" role="tablist" aria-label="粒度">' +
@@ -178,11 +179,12 @@ function renderLogins(picks) {
     html += '<div class="chart-foot"><div class="sums">' +
       withData.map(p => {
         const arr = grain === "day" ? p.logins.daily : p.logins.weekly;
+        const metric = p.logins.label || "登錄次數";
         return '<span class="sum-item"><i style="background:' + p.color + '"></i>' + p.short +
-          " 合計 <strong>" + fmt(arr.reduce((a, b) => a + b, 0)) + "</strong> " + p.logins.unit + "</span>";
+          " · " + metric + " 合計 <strong>" + fmt(arr.reduce((a, b) => a + b, 0)) + "</strong> " + p.logins.unit + "</span>";
       }).join("") +
       '</div><p class="axis-note">橫軸是' + axis + "，因檔期長度不同（17 vs 45 vs 77 天）。" +
-      (grain === "week" ? "週切依各檔成效頁：0050 每 7 日；WBC 為結案五波週報。傑憲無發票登錄數列。" : "") +
+      (grain === "week" ? "週切依各檔成效頁：0050 每 7 日；WBC 為結案五波週報（抽卡／發票）。傑憲無此維度。" : "") +
       "</p></div>";
   }
   if (missing.length) {
