@@ -21,9 +21,6 @@ const INV_0050 = [16,20,24,33,41,114,61,53,45,30,34,31,21,19,17,17,17,25,27,22,2
 const WEEK_INV_TOKYO = [462, 815, 1067, 1913, 1221];
 const INV_TOKYO = [32,30,32,35,35,30,36,27,29,29,32,29,28,25,33,50,57,59,50,53,49,64,57,55,49,57,52,46,56,61,75,64,65,68,65,74,67,88,69,64,68,84,67,76,73,129,144,128,108,133,133,136,150,115,109,106,133,140,123,126,63,63,85,83,71,74,84,78,76,65,60,79,59,78,67,59,77];
 
-/* 傑憲 登錄次數 — 示意（結案無發票日數列；17 天、合計低千） */
-const INV_JIEXIAN = [212,268,221,98,72,81,108,186,134,109,92,84,76,98,128,82,58];
-
 const DIMS = [
   { key: "logins", label: "登錄次數", where: "成效總覽" },
   { key: "gender", label: "男女比", where: "消費者" },
@@ -60,43 +57,30 @@ const PROJECTS = [
     name: "真假傑憲大挑戰",
     status: "已結束",
     statusKind: "done",
-    fake: true,
+    fake: false,
     color: "#E0B34E",
     days: 17,
     href: "jiexian.html",
-    logins: { daily: INV_JIEXIAN, weekly: weekBuckets(INV_JIEXIAN), unit: "次" },
-    gender: {
-      total: 1840, unit: "人",
-      items: [
-        { label: "男", n: 1067, pct: 58.0, color: "#007A49" },
-        { label: "女", n: 552, pct: 30.0, color: "#5CB88A" },
-        { label: "未揭露", n: 221, pct: 12.0, color: "#E0B34E" }
-      ]
-    },
-    channel: { labels: ["全聯","7-ELEVEN","家樂福","楓康","其他"], data: [682,546,318,221,340], unit: "次" },
-    product: { labels: ["金牌","18天","經典","金牌 one","果微醺"], data: [2140,1688,1210,890,472], unit: "罐" }
+    /* 結案為遊戲／綁定活動，無發票登錄日數列 */
+    logins: null,
+    gender: null,
+    channel: null,
+    product: null
   },
   {
     id: "tokyo",
-    short: "東京",
-    name: "喝台啤抽東京雙人來回機票",
+    short: "WBC",
+    name: "成就經典｜喝台啤抽東京雙人來回機票",
     status: "已結束",
     statusKind: "done",
-    fake: true,
+    fake: false,
     color: "#298F66",
     days: 77,
     href: "tokyo.html",
     logins: { daily: INV_TOKYO, weekly: WEEK_INV_TOKYO, unit: "筆" },
-    gender: {
-      total: 1472, unit: "人",
-      items: [
-        { label: "男", n: 486, pct: 33.0, color: "#007A49" },
-        { label: "女", n: 812, pct: 55.2, color: "#5CB88A" },
-        { label: "未揭露", n: 174, pct: 11.8, color: "#E0B34E" }
-      ]
-    },
+    gender: null,
     channel: { labels: ["7-ELEVEN","全聯","全家","美聯社","萊爾富","其他"], data: [1612,1320,936,508,248,740], unit: "筆" },
-    product: { labels: ["金牌","經典","18天","金牌 one","黑啤"], data: [8209,6544,3288,2191,1680], unit: "罐" }
+    product: null
   }
 ];
 
@@ -158,7 +142,7 @@ function emptyCard(p, dimLabel) {
   return '<article class="mini">' +
     '<div class="mini-h"><h3><i class="swatch" style="background:' + p.color + '"></i>' + p.short + "</h3>" +
     '<span class="status ' + p.statusKind + '">' + p.status + "</span></div>" +
-    '<div class="empty"><div>無此維度</div><small>此專案成效沒有「' + dimLabel + "」</small></div></article>";
+    '<div class="empty"><div>無此維度</div><small>此專案結案／成效沒有「' + dimLabel + "」</small></div></article>";
 }
 function lineFill(hex) {
   return (c) => {
@@ -198,7 +182,7 @@ function renderLogins(picks) {
           " 合計 <strong>" + fmt(arr.reduce((a, b) => a + b, 0)) + "</strong> " + p.logins.unit + "</span>";
       }).join("") +
       '</div><p class="axis-note">橫軸是' + axis + "，因檔期長度不同（17 vs 45 vs 77 天）。" +
-      (grain === "week" ? "週切依各檔成效頁：0050／傑憲每 7 日；東京為結案五波週報。" : "") +
+      (grain === "week" ? "週切依各檔成效頁：0050 每 7 日；WBC 為結案五波週報。傑憲無發票登錄數列。" : "") +
       "</p></div>";
   }
   if (missing.length) {
