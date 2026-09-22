@@ -14,19 +14,39 @@ function weekBuckets(arr) {
   return values;
 }
 
-/* 0050 invoices.daily — copied from index.html METRICS.invoices / buildSeries */
+/* 0050 — from index.html METRICS (will refresh from live CRM) */
+const VIS_0050 = [26,32,38,51,64,179,96,83,71,47,53,48,34,30,28,27,27,38,41,35,39,43,46,49,61,61,50,48,45,41,36,42,37,24,21,20,20,21,34,37,31,35,39,42,44];
+const BIND_0050 = [36,45,53,71,89,249,134,116,97,66,71,65,47,42,38,37,37,51,55,48,53,59,64,68,83,83,70,67,62,57,50,55,49,32,28,27,27,29,44,49,43,48,54,58,61];
 const INV_0050 = [16,20,24,33,41,114,61,53,45,30,34,31,21,19,17,17,17,25,27,22,24,27,29,31,39,39,32,31,28,26,23,27,24,15,13,12,12,13,22,24,20,22,25,26,28];
+const CAN_0050 = [295,369,443,590,738,2066,1107,959,814,536,573,519,381,341,313,300,303,410,440,390,435,480,521,554,664,670,570,546,508,461,408,444,395,264,235,220,221,237,356,395,349,395,437,470,492];
 
-/* 東京 invDaily — same splitTotal(WEEK_INV, nDays, 1400 + i*17) as tokyo.html */
-const WEEK_INV_TOKYO = [462, 815, 1067, 1913, 1221];
+/* WBC／東京 — 結案：發票＝抽卡；罐數＝發票×4 */
+const WEEK_INV_TOKYO = [462,815,1067,1913,1221];
 const INV_TOKYO = [32,30,32,35,35,30,36,27,29,29,32,29,28,25,33,50,57,59,50,53,49,64,57,55,49,57,52,46,56,61,75,64,65,68,65,74,67,88,69,64,68,84,67,76,73,129,144,128,108,133,133,136,150,115,109,106,133,140,123,126,63,63,85,83,71,74,84,78,76,65,60,79,59,78,67,59,77];
+const WEEK_CAN_TOKYO = [1848,3260,4268,7652,4884];
+const CAN_TOKYO = [128,120,128,140,140,120,144,108,116,116,128,116,112,100,132,200,228,236,200,212,196,256,228,220,196,228,208,184,224,244,300,256,260,272,260,296,268,352,276,256,272,336,268,304,292,516,576,512,432,532,532,544,600,460,436,424,532,560,492,504,252,252,340,332,284,296,336,312,304,260,240,316,236,312,268,236,308];
 
-const DIMS = [
-  { key: "logins", label: "登錄次數", where: "成效總覽" },
+/* 傑憲 — 結案日數列（綁定）；進站僅有合計、無日曲線；無發票／罐數 */
+const BIND_JIEXIAN = [980,3128,1911,105,34,15,42,416,138,190,96,48,81,24,71,5,8];
+
+const SERIES_DIMS = [
+  { key: "visits", label: "進站人數", where: "成效總覽", yUnit: "人" },
+  { key: "binds", label: "新增綁定人數", where: "成效總覽", yUnit: "人" },
+  { key: "invoices", label: "登錄發票張數", where: "成效總覽", yUnit: "張" },
+  { key: "cans", label: "登錄罐數", where: "成效總覽", yUnit: "罐" }
+];
+const OTHER_DIMS = [
   { key: "gender", label: "男女比", where: "消費者" },
   { key: "channel", label: "通路", where: "登錄" },
   { key: "product", label: "產品種類", where: "登錄" }
 ];
+const DIMS = SERIES_DIMS.concat(OTHER_DIMS);
+
+function seriesOf(p, key) {
+  const v = p[key];
+  if (!v || !v.daily || !v.daily.length) return null;
+  return v;
+}
 
 const PROJECTS = [
   {
@@ -39,7 +59,10 @@ const PROJECTS = [
     color: "#007A49",
     days: 45,
     href: "index.html",
-    logins: { daily: INV_0050, weekly: weekBuckets(INV_0050), unit: "次" },
+    visits: { daily: VIS_0050, weekly: weekBuckets(VIS_0050), unit: "人" },
+    binds: { daily: BIND_0050, weekly: weekBuckets(BIND_0050), unit: "人" },
+    invoices: { daily: INV_0050, weekly: weekBuckets(INV_0050), unit: "張" },
+    cans: { daily: CAN_0050, weekly: weekBuckets(CAN_0050), unit: "罐" },
     gender: {
       total: 640, unit: "人",
       items: [
@@ -61,8 +84,12 @@ const PROJECTS = [
     color: "#E0B34E",
     days: 17,
     href: "jiexian.html",
-    /* 結案為遊戲／綁定活動，無發票登錄日數列 */
-    logins: null,
+    /* 結案：進站 21,000 僅合計；綁定有日數列；非發票活動 */
+    visitsTotal: 21000,
+    visits: null,
+    binds: { daily: BIND_JIEXIAN, weekly: weekBuckets(BIND_JIEXIAN), unit: "人" },
+    invoices: null,
+    cans: null,
     gender: null,
     channel: null,
     product: null
@@ -77,15 +104,20 @@ const PROJECTS = [
     color: "#2B6CB0",
     days: 77,
     href: "tokyo.html",
-    /* WBC：抽卡次數＝有效發票登錄次數（同一數列） */
-    logins: { daily: INV_TOKYO, weekly: WEEK_INV_TOKYO, unit: "次", label: "抽卡／發票登錄" },
+    /* 進站／不重複登錄僅合計；發票＝抽卡；罐數＝發票×4 */
+    visitsTotal: 27148,
+    bindsTotal: 1472,
+    visits: null,
+    binds: null,
+    invoices: { daily: INV_TOKYO, weekly: WEEK_INV_TOKYO, unit: "張", label: "抽卡／有效發票" },
+    cans: { daily: CAN_TOKYO, weekly: WEEK_CAN_TOKYO, unit: "罐" },
     gender: null,
     channel: { labels: ["7-ELEVEN","全聯","全家","美聯社","萊爾富","其他"], data: [1612,1320,936,508,248,740], unit: "筆" },
     product: null
   }
 ];
 
-const state = { selected: new Set(PROJECTS.map(p => p.id)), dim: "logins", grain: "day" };
+const state = { selected: new Set(PROJECTS.map(p => p.id)), dim: "visits", grain: "day" };
 const charts = [];
 function killCharts() {
   while (charts.length) {
@@ -139,11 +171,14 @@ function renderPicks() {
     btn.addEventListener("click", () => { state.dim = btn.dataset.dim; render(); });
   });
 }
-function emptyCard(p, dimLabel) {
+function emptyCard(p, dimLabel, key) {
+  let note = "此專案結案／成效沒有「" + dimLabel + "」日數列，無法畫曲線。";
+  if (key === "visits" && p.visitsTotal) note = "結案僅有合計 " + fmt(p.visitsTotal) + " 人，無日數列。";
+  if (key === "binds" && p.bindsTotal) note = "結案僅有合計 " + fmt(p.bindsTotal) + " 人，無日數列。";
   return '<article class="mini">' +
     '<div class="mini-h"><h3><i class="swatch" style="background:' + p.color + '"></i>' + p.short + "</h3>" +
     '<span class="status ' + p.statusKind + '">' + p.status + "</span></div>" +
-    '<div class="empty"><div>無此維度</div><small>此專案結案／成效沒有「' + dimLabel + "」</small></div></article>";
+    '<div class="empty"><div>無日曲線</div><small>' + note + "</small></div></article>";
 }
 function lineFill(hex) {
   return (c) => {
@@ -155,11 +190,14 @@ function lineFill(hex) {
     return gr;
   };
 }
-function renderLogins(picks) {
-  const withData = picks.filter(p => p.logins && p.logins.daily && p.logins.daily.length);
-  const missing = picks.filter(p => !(p.logins && p.logins.daily && p.logins.daily.length));
+
+function renderSeries(picks, dim) {
+  const key = dim.key;
+  const dimLabel = dim.label;
+  const withData = picks.filter(p => seriesOf(p, key));
+  const missing = picks.filter(p => !seriesOf(p, key));
   const grain = state.grain;
-  const series = withData.map(p => grain === "day" ? p.logins.daily : p.logins.weekly);
+  const series = withData.map(p => grain === "day" ? p[key].daily : p[key].weekly);
   const maxN = series.reduce((m, s) => Math.max(m, s.length), 0);
   const labels = Array.from({ length: maxN }, (_, i) => String(i + 1));
   const axis = grain === "day" ? "活動第 N 天" : "活動第 N 週";
@@ -167,7 +205,9 @@ function renderLogins(picks) {
     "<span><i style=\"background:" + p.color + "\"></i>" + p.short + (p.fake ? " · 示意" : "") + "</span>"
   ).join("");
   let html = '<div class="toolbar">' +
-    '<div class="hint"><b>數列說明</b>　' + axis + " · 各檔自己的" + (grain === "day" ? "日" : "週") + "數列（WBC 的登錄次數＝抽卡次數＝有效發票登錄）" +
+    '<div class="hint"><b>數列說明</b>　' + axis + " · 「" + dimLabel + "」各檔自己的" + (grain === "day" ? "日" : "週") + "數列" +
+    (key === "invoices" ? "（WBC＝抽卡／有效發票登錄）" : "") +
+    (key === "cans" ? "（WBC 罐數＝發票×4 推估）" : "") +
     (legend ? '<div class="legend-row" style="margin-top:8px">' + legend + "</div>" : "") +
     "</div>" +
     '<div class="seg" role="tablist" aria-label="粒度">' +
@@ -178,18 +218,18 @@ function renderLogins(picks) {
     html += '<div class="chart-wrap"><canvas id="cmpLine"></canvas></div>';
     html += '<div class="chart-foot"><div class="sums">' +
       withData.map(p => {
-        const arr = grain === "day" ? p.logins.daily : p.logins.weekly;
-        const metric = p.logins.label || "登錄次數";
+        const arr = grain === "day" ? p[key].daily : p[key].weekly;
+        const metric = (p[key].label || dimLabel);
         return '<span class="sum-item"><i style="background:' + p.color + '"></i>' + p.short +
-          " · " + metric + " 合計 <strong>" + fmt(arr.reduce((a, b) => a + b, 0)) + "</strong> " + p.logins.unit + "</span>";
+          " · " + metric + " 合計 <strong>" + fmt(arr.reduce((a, b) => a + b, 0)) + "</strong> " + p[key].unit + "</span>";
       }).join("") +
       '</div><p class="axis-note">橫軸是' + axis + "，因檔期長度不同（17 vs 45 vs 77 天）。" +
-      (grain === "week" ? "週切依各檔成效頁：0050 每 7 日；WBC 為結案五波週報（抽卡／發票）。傑憲無此維度。" : "") +
+      (grain === "week" ? "週切：0050／傑憲每 7 日；WBC 為結案五波週報。" : "") +
       "</p></div>";
   }
   if (missing.length) {
     html += '<div class="mini-grid cols-' + Math.min(3, missing.length) + '" style="margin-top:16px">' +
-      missing.map(p => emptyCard(p, "登錄次數")).join("") + "</div>";
+      missing.map(p => emptyCard(p, dimLabel, key)).join("") + "</div>";
   }
   document.getElementById("resultsBody").innerHTML = html;
   document.querySelectorAll("#resultsBody [data-grain]").forEach(btn => {
@@ -197,14 +237,15 @@ function renderLogins(picks) {
   });
   if (!withData.length) return;
   const pointR = maxN > 20 ? 2.5 : 4;
+  const yUnit = dim.yUnit || (withData[0][key].unit);
   charts.push(new Chart(document.getElementById("cmpLine"), {
     type: "line",
     data: {
       labels,
       datasets: withData.map(p => {
-        const data = grain === "day" ? p.logins.daily : p.logins.weekly;
+        const data = grain === "day" ? p[key].daily : p[key].weekly;
         return {
-          label: p.short, data, unit: p.logins.unit,
+          label: p.short, data, unit: p[key].unit,
           borderColor: p.color, backgroundColor: lineFill(p.color),
           fill: true, tension: 0.25, borderWidth: 2.2,
           pointRadius: pointR, pointHoverRadius: 6,
@@ -240,7 +281,7 @@ function renderLogins(picks) {
           beginAtZero: true, grace: "8%",
           ticks: { font: { family: "Noto Sans TC", size: 11 }, color: "#6F6A64", callback: v => fmt(v) },
           grid: { color: "rgba(228,219,210,.9)" }, border: { display: false },
-          title: { display: true, text: "次", color: "#6F6A64", font: { family: "Noto Sans TC", size: 11 } }
+          title: { display: true, text: yUnit, color: "#6F6A64", font: { family: "Noto Sans TC", size: 11 } }
         }
       }
     }
@@ -253,7 +294,7 @@ function renderGender(picks) {
   document.getElementById("resultsBody").innerHTML =
     '<div class="mini-grid cols-' + cols + '">' +
     picks.map((p, i) => {
-      if (!p.gender) return emptyCard(p, dimLabel);
+      if (!p.gender) return emptyCard(p, dimLabel, key);
       return '<article class="mini">' +
         '<div class="mini-h"><h3><i class="swatch" style="background:' + p.color + '"></i>' + p.short +
         (p.fake ? ' <span class="fake-pill">示意</span>' : "") + "</h3>" +
@@ -312,7 +353,7 @@ function renderBars(picks, key, dimLabel) {
     '<div class="mini-grid cols-' + cols + '">' +
     picks.map((p, i) => {
       const v = p[key];
-      if (!v || !v.data) return emptyCard(p, dimLabel);
+      if (!v || !v.data) return emptyCard(p, dimLabel, key);
       return '<article class="mini">' +
         '<div class="mini-h"><h3><i class="swatch" style="background:' + p.color + '"></i>' + p.short +
         (p.fake ? ' <span class="fake-pill">示意</span>' : "") + "</h3>" +
@@ -360,19 +401,21 @@ function renderBars(picks, key, dimLabel) {
     }));
   });
 }
+
 function render() {
   killCharts();
   renderPicks();
   const dim = DIMS.find(d => d.key === state.dim);
+  const isSeries = SERIES_DIMS.some(d => d.key === state.dim);
   document.getElementById("resultsTitle").innerHTML = dim.label + '<span class="sub">' + dim.where +
-    (state.dim === "logins" ? " · 活動第 N 天" : " · 各檔小倍數") + "</span>";
+    (isSeries ? " · 活動第 N 天" : " · 各檔小倍數") + "</span>";
   const picks = selectedProjects();
   if (!picks.length) {
     document.getElementById("resultsBody").innerHTML =
       '<div class="empty page-empty"><div>請至少選擇一個專案</div><small>取消勾選後會立刻重繪；需保留至少一檔才能比較。</small></div>';
     return;
   }
-  if (state.dim === "logins") renderLogins(picks);
+  if (isSeries) renderSeries(picks, dim);
   else if (state.dim === "gender") renderGender(picks);
   else if (state.dim === "channel") renderBars(picks, "channel", "通路");
   else renderBars(picks, "product", "產品種類");
